@@ -9,7 +9,7 @@ export default function LoginPage() {
 
       {/* Container do login */}
       <div className="flex h-screen items-center justify-center">
-        {/* Imagens de fundo */}
+      {/* Imagens de fundo */}
       <div className="absolute inset-0 -z-10">
             <img src="/vector.png" alt="vector" className="absolute top-[20%] left-[5%]" />
             <img src="/vector1.png" className="absolute top-[10%] left-[30%] w-[10%]" />
