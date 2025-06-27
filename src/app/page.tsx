@@ -33,6 +33,14 @@ const mentores = [
     rating: 5.0,
     sessions: 87,
   },
+  {
+    id: 4,
+    name: "Pedro Henrique",
+    area: "Músico e Filantropo",
+    avatar: "/placeholder.svg?height=60&width=60",
+    rating: 5.0,
+    sessions: 28,
+  },
 ]
 
 const editais = [
