@@ -1,4 +1,76 @@
-export default function LoginPage() {
+import { Button } from "@/presentation/external/components/ui/button";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/presentation/external/components/ui/sidebar";
+import { HomeSideBar } from "@/presentation/shared/layout/sidebar";
+import { Bell, Calendar, Clock, Star, TrendingUp, Users } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/presentation/external/components/ui/avatar"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/presentation/external/components/ui/card";
+import { Progress } from "@/presentation/external/components/ui/progress";
+import { Badge } from "@/presentation/external/components/ui/badge";
+
+
+const mentores = [
+  {
+    id: 1,
+    name: "Ana Silva",
+    area: "Marketing Digital",
+    avatar: "/placeholder.svg?height=60&width=60",
+    rating: 4.9,
+    sessions: 120,
+  },
+  {
+    id: 2,
+    name: "Carlos Santos",
+    area: "Desenvolvimento de Produto",
+    avatar: "/placeholder.svg?height=60&width=60",
+    rating: 4.8,
+    sessions: 95,
+  },
+  {
+    id: 3,
+    name: "Maria Oliveira",
+    area: "Finanças e Investimentos",
+    avatar: "/placeholder.svg?height=60&width=60",
+    rating: 5.0,
+    sessions: 87,
+  },
+  {
+    id: 4,
+    name: "Pedro Henrique",
+    area: "Músico e Filantropo",
+    avatar: "/placeholder.svg?height=60&width=60",
+    rating: 5.0,
+    sessions: 28,
+  },
+]
+
+const editais = [
+  {
+    id: 1,
+    title: "Programa de Aceleração Tech 2024",
+    description: "Programa focado em startups de tecnologia com mentoria especializada e investimento inicial.",
+    startDate: "15 Jan 2024",
+    endDate: "30 Jan 2024",
+    category: "Tecnologia",
+  },
+  {
+    id: 2,
+    title: "Impacto Social - Edital Especial",
+    description: "Voltado para startups que geram impacto social positivo em comunidades de baixa renda.",
+    startDate: "20 Jan 2024",
+    endDate: "05 Fev 2024",
+    category: "Impacto Social",
+  },
+  {
+    id: 3,
+    title: "Inovação Sustentável",
+    description: "Para startups focadas em soluções sustentáveis e economia circular.",
+    startDate: "25 Jan 2024",
+    endDate: "10 Fev 2024",
+    category: "Sustentabilidade",
+  },
+]
+
+export default function HomePage() {
   return (
     <div className="relative min-h-screen font-[var(--font-poppins)] text-neutral-900">
       {/* Logo no topo */}
