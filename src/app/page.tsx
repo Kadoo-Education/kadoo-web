@@ -1,7 +1,7 @@
 import { Button } from "@/presentation/external/components/ui/button";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/presentation/external/components/ui/sidebar";
 import { HomeSideBar } from "@/presentation/shared/layout/sidebar";
-import { Bell, Calendar, Clock, Star, TrendingUp, Users } from "lucide-react";
+import { /*Bell */ Calendar, Clock, Star, TrendingUp, Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/presentation/external/components/ui/avatar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/presentation/external/components/ui/card";
 import { Progress } from "@/presentation/external/components/ui/progress";
@@ -72,81 +72,204 @@ const editais = [
 
 export default function HomePage() {
   return (
-    <div className="relative min-h-screen font-[var(--font-poppins)] text-neutral-900">
-      {/* Logo no topo */}
-      <div className="absolute top-0 left-9 z-10 flex flex-col gap-2 p-8">
-        <img src="/logo.png" alt="Logo Kadoo" className="w-40 h-auto" />
-        <p className="text-xl font-semi">Education</p>
-      </div>
+    <div className="bg-gray-50 min-h-screen">
+      <SidebarProvider>
+        <HomeSideBar />
+        <SidebarInset>
+          <header className="flex items-center justify-between p-6 bg-white border-b">
+            <div className="flex items-center gap-4">
+              <SidebarTrigger />
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+                <p className="text-gray-600">Bem-vindo de volta, Pedro!</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <Avatar>
+                <AvatarImage src="/placeholder.svg?height=40&width=40" />
+                <AvatarFallback className="bg-[#5127FF] text-white">P</AvatarFallback>
+              </Avatar>
+              <div className="hidden md:block">
+                <p className="font-medium text-gray-900">Pedro Silva</p>
+                <p className="text-sm text-gray-600">CEO</p>
+              </div>
+            </div>
+          </header>
 
-      {/* Container do login */}
-      <div className="flex h-screen items-center justify-center">
-      {/* Imagens de fundo */}
-      <div className="absolute inset-0 -z-10">
-            <img src="/vector.png" alt="vector" className="absolute top-[20%] left-[5%]" />
-            <img src="/vector1.png" className="absolute top-[10%] left-[30%] w-[10%]" />
-            <img src="/vector2.png" className="absolute top-[49%] left-[32%] w-[60px]" />
-            <img src="/vector3.png" className="absolute bottom-[5%] right-[20%]" />
-            <img src="/vector4.png" className="absolute bottom-[5%] right-[6%]" />
-            <img src="/vector5.png" className="absolute top-[60%] right-[6%] -translate-y-1/2" />
-            <img src="/vector6.png" className="absolute top-0 right-0" />
-            <img src="/group4.png" className="absolute top-0 left-[30%]" />
-            <img src="/group6.png" className="absolute bottom-0 left-0 w-[20%]" />
-            <img src="/group7.png" className="absolute bottom-0 left-[5%] w-[25%]" />
-            <img src="/group8.png" className="absolute bottom-0 left-[45%]" />
-            <img src="/group9.png" className="absolute bottom-[10%] left-[45%]" />
-      </div>
-      {/* Parte esquerda */}
-        <div className="w-1/2 flex flex-col text-left px-20 relative overflow-hidden">
-          <h1 className="text-8xl font-bold mt-16">Bem vindo!</h1>
-          <div className="w-[18%] h-[2px] bg-black my-8" />
-          <p className="text-xl mb-6">
-            Você ainda não conhece a Kadoo?
-            <br />
-            Venha conhecer agora!
-          </p>
-          <button className="bg-[#5f2eea] text-white px-5 py-2 rounded-lg w-[20%]">
-            Leia mais!
-          </button>
-        </div>
+          <main className="p-6 space-y-8">
+            <Card className="bg-gradient-to-r from-[#5127FF] to-[#5127FF]/80 text-white border-0">
+              <CardContent className="p-8">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                  <div className="space-y-4">
+                    <h2 className="text-3xl font-bold">Bem-vindo, Pedro! 👋</h2>
+                    <p className="text-xl text-white/90">Pronto para transformar sua ideia em realidade?</p>
+                  </div>
+                  <Button size="lg" className="bg-[#F4DA02] text-black hover:bg-[#F4DA02]/90 font-semibold px-8">
+                    Ver Editais Abertos
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
 
-        {/* Parte direita */}
-        <div className="w-[500px] bg-gray-100 rounded-2xl p-15 shadow-inner mx-auto min-h-[600px]">
-          <h2 className="text-2xl text-center mb-20">Faça seu login</h2>
-          <form className="flex flex-col gap-10">
-            <div>
-              <label className="block mb-1 text-sm font-medium">Email</label>
-              <input
-                type="email"
-                placeholder="Escreva aqui"
-                className="w-full p-3 border border-gray-700 rounded-lg text-sm text-gray-700 bg-white"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-[#5127FF]" />
+                    Sua Jornada
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex justify-between text-sm">
+                      <span>Pré-aceleração</span>
+                      <span className="font-medium">2 de 3</span>
+                    </div>
+                    <Progress value={66} className="h-2 " />
+                    <p className="text-sm text-gray-600">Continue evoluindo na sua jornada!</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-[#F4DA02]" />
+                    Próximas Atividades
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm">
+                      <div className="w-2 h-2 bg-[#5127FF] rounded-full"></div>
+                      <span>Mentoria com Ana Silva</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <div className="w-2 h-2 bg-[#F4DA02] rounded-full"></div>
+                      <span>Workshop de Pitch</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Users className="w-5 h-5 text-green-500" />
+                    Comunidade
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <p className="text-2xl font-bold">1,247</p>
+                    <p className="text-sm text-gray-600">Empreendedores conectados</p>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
-            <div>
-              <label className="block mb-1 text-sm font-medium">Senha</label>
-              <input
-                type="password"
-                placeholder="Escreva aqui"
-                className="w-full p-3 border border-gray-700 rounded-lg text-sm text-gray-700 bg-white"
-              />
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-gray-900">Editais Abertos</h2>
+                <Button
+                  variant="outline"
+                  className="border-[#5127FF] text-[#5127FF] hover:bg-[#5127FF] hover:text-white"
+                >
+                  Ver Todos
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {editais.map((edital) => (
+                  <Card key={edital.id} className="hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <div className="flex items-start justify-between gap-2">
+                        <CardTitle className="text-lg leading-tight">{edital.title}</CardTitle>
+                        <Badge variant="secondary" className="bg-[#F4DA02]/20 text-[#5127FF] shrink-0">
+                          {edital.category}
+                        </Badge>
+                      </div>
+                      <CardDescription className="text-sm">{edital.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center gap-4 text-sm text-gray-600">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          <span>{edital.startDate}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-4 h-4" />
+                          <span>{edital.endDate}</span>
+                        </div>
+                      </div>
+                      <Button className="w-full bg-[#5127FF] hover:bg-[#5127FF]/90">Inscrever-se</Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </div>
 
-            <button
-              type="submit"
-              className="mt-1 bg-gradient-to-r from-[#5f2eea] to-[#5f2eea] text-white rounded-lg px-6 py-3"
-            >
-              Login
-            </button>
-          </form>
-          <p className="text-center mt-6 text-sm">
-            Ainda não possui uma conta?{" "}
-            <a href="#" className="text-[#5f2eea] hover:underline">
-              Cadastre-se!
-            </a>
-          </p>
-        </div>
-      </div>
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-gray-900">Mentores em Destaque</h2>
+                <Button
+                  variant="outline"
+                  className="border-[#5127FF] text-[#5127FF] hover:bg-[#5127FF] hover:text-white"
+                >
+                  Ver Todos
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {mentores.map((mentor) => (
+                  <Card key={mentor.id} className="hover:shadow-lg transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-4 mb-4">
+                        <Avatar>
+                          <AvatarImage src="/placeholder.svg?height=40&width=40" />
+                          <AvatarFallback className="bg-[#5127FF] text-white">{mentor.name.split(" ")
+                            .map((n) => n[0])
+                            .join("")}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-lg">{mentor.name}</h3>
+                          <p className="text-gray-600 text-sm">{mentor.area}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
+                        <div className="flex items-center gap-1">
+                          <Star className="w-4 h-4 fill-[#F4DA02] text-[#F4DA02]" />
+                          <span>{mentor.rating}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Users className="w-4 h-4" />
+                          <span>{mentor.sessions} sessões</span>
+                        </div>
+                      </div>
+
+                      <Button
+                        variant="outline"
+                        className="w-full border-[#5127FF] text-[#5127FF] hover:bg-[#5127FF] hover:text-white"
+                      >
+                        Ver Perfil
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </main>
+
+          <footer className="mt-12 p-6 bg-white border-t">
+            <div className="text-center text-sm text-gray-600">
+              <p>© 2025 Kadoo - Acelerando startups para transformar vidas</p>
+              <p className="mt-1">Uma iniciativa para democratizar o empreendedorismo</p>
+            </div>
+          </footer>
+        </SidebarInset>
+      </SidebarProvider>
     </div>
-  )
+  );
 }
+
