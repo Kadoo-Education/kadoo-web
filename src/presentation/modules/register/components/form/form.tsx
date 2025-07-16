@@ -19,7 +19,6 @@ import { Controller, useForm } from 'react-hook-form'
 import { RegisterValidation } from '@/validation/protocols/register/register'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { registerValidation } from '@/validation/validators/register/register-validation'
-import { useState } from 'react'
 
 const AREA_OPTIONS = ["Educação", "Finanças", "Tecnologia", "Saúde", "Marketing", "Vendas"]
 
