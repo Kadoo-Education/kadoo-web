@@ -1,6 +1,6 @@
 import { Button } from "@/presentation/external/components/ui/button";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/presentation/external/components/ui/sidebar";
-import { HomeSideBar } from "@/presentation/shared/layout/sidebar";
+import { HomeSideBar } from "@/presentation/shared/layout/components/sidebar";
 import { /*Bell */ Calendar, Clock, Star, TrendingUp, Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/presentation/external/components/ui/avatar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/presentation/external/components/ui/card";
