@@ -12,14 +12,21 @@ import { ptBR } from "date-fns/locale"
 import { format } from "date-fns"
 import { CalendarIcon } from "lucide-react"
 import { Calendar } from '@/presentation/external/components/ui/calendar'
+import { registerGatewayHttp } from '@/infra/modules/register/register-gateway-http'
+import { Role } from '@/business/domain/role'
+import { useRouter } from 'next/navigation'
+import { APP_ROUTES } from '@/shared/constants/route'
 
 export function Form() {
+
+  const { push } = useRouter()
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'student',
+    role: Role.STUDENT,
     birthDate: undefined as Date | undefined,
     cpf: '',
     mentorField: [] as string[],
@@ -66,6 +73,15 @@ export function Form() {
 
     setIsSubmitting(true)
     try {
+      registerGatewayHttp.create({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        cpf: formData.cpf.replace(/\D/g, ''),
+        role: formData.role,
+        birthDate: formData.birthDate,
+        expertiseAreas: formData.role === 'mentor' ? formData.mentorField : undefined,
+      })
       console.log('Enviando dados', formData)
     } catch (error) {
       console.error(error)
@@ -74,9 +90,7 @@ export function Form() {
     }
   }
 
-  const onSwitchToLogin = () => {
-    console.log('Ir para login')
-  }
+
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -278,7 +292,7 @@ export function Form() {
           Já possui uma conta?{' '}
           <button
             type="button"
-            onClick={onSwitchToLogin}
+            onClick={() => push(APP_ROUTES.login)}
             className="font-medium text-[#5f2eea] hover:text-[#5f2eea]/80 transition-colors"
           >
             Faça login

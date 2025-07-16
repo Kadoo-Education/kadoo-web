@@ -1,6 +1,14 @@
+async function handleSubmitLogin(event: React.FormEvent<HTMLFormElement>) {
+  event.preventDefault();
+  
+  
+  try {}
+  catch(e) {}
+}
+
 export function Form() {
   return (
-    <form className="flex flex-col gap-8">
+    <form className="flex flex-col gap-8" onSubmit={handleSubmitLogin}>
       <div className="flex flex-col gap-2">
         <label className="text-sm font-medium text-neutral-700">Email</label>
         <input
@@ -28,5 +36,3 @@ export function Form() {
     </form>
   )
 }
-
-Form.Login = Form

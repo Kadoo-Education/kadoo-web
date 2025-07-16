@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Form } from "../form/form";
+import { APP_ROUTES } from "@/shared/constants/route";
 
 export function LoginSection() {
   return (
@@ -44,13 +45,11 @@ export function LoginSection() {
             Faça seu login
           </h2>
 
-
-          <Form.Login />
-          
+          <Form />
 
           <p className="text-center text-sm text-neutral-700">
             Ainda não possui uma conta?{" "}
-            <a href="#" className="text-[#5f2eea] font-medium hover:underline">
+            <a href={APP_ROUTES.register} className="text-[#5f2eea] font-medium hover:underline">
               Cadastre-se!
             </a>
           </p>
