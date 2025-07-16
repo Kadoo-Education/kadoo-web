@@ -1,31 +1,48 @@
-async function handleSubmitLogin(event: React.FormEvent<HTMLFormElement>) {
+'use client'
+
+import { loginGatewayHttp } from "@/infra/modules/login/login-gateway-http";
+import { Input } from "@/presentation/shared/components";
+import { FormEvent } from "react";
+
+async function handleSubmitLogin(event: FormEvent<HTMLFormElement>) {
   event.preventDefault();
-  
-  
-  try {}
-  catch(e) {}
+
+  const form = event.currentTarget;
+  const formData = new FormData(form);
+
+  const email = formData.get("email")?.toString() || "";
+  const password = formData.get("password")?.toString() || "";
+
+  try {
+    await loginGatewayHttp.login({ email, password });
+    alert("Login realizado com sucesso!");
+  } catch (error) {
+    console.error("Erro ao fazer login:", error);
+  }
 }
 
 export function Form() {
   return (
     <form className="flex flex-col gap-8" onSubmit={handleSubmitLogin}>
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-neutral-700">Email</label>
-        <input
+      <Input.Root>
+        <Input.Label htmlFor="email">Email</Input.Label>
+        <Input.Core
+          id="email"
+          name="email"
           type="email"
           placeholder="seu@email.com"
-          className="w-full px-4 py-3 rounded-lg border border-neutral-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#5f2eea] transition-all"
         />
-      </div>
+      </Input.Root>
 
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-neutral-700">Senha</label>
-        <input
+      <Input.Root>
+        <Input.Label htmlFor="password">Senha</Input.Label>
+        <Input.Core
+          id="password"
+          name="password"
           type="password"
           placeholder="••••••••"
-          className="w-full px-4 py-3 rounded-lg border border-neutral-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#5f2eea] transition-all"
         />
-      </div>
+      </Input.Root>
 
       <button
         type="submit"
@@ -34,5 +51,5 @@ export function Form() {
         Entrar
       </button>
     </form>
-  )
+  );
 }

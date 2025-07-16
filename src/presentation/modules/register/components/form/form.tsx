@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from '@/presentation/external/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/presentation/external/components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/presentation/external/components/ui/select'
@@ -16,154 +15,99 @@ import { registerGatewayHttp } from '@/infra/modules/register/register-gateway-h
 import { Role } from '@/business/domain/role'
 import { useRouter } from 'next/navigation'
 import { APP_ROUTES } from '@/shared/constants/route'
+import { Controller, useForm } from 'react-hook-form'
+import { RegisterValidation } from '@/validation/protocols/register/register'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { registerValidation } from '@/validation/validators/register/register-validation'
+
+const AREA_OPTIONS = ["Educação", "Finanças", "Tecnologia", "Saúde", "Marketing", "Vendas"]
+
 
 export function Form() {
 
   const { push } = useRouter()
 
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    role: Role.STUDENT,
-    birthDate: undefined as Date | undefined,
-    cpf: '',
-    mentorField: [] as string[],
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    control,
+    formState: { errors, isSubmitting },
+    watch
+  } = useForm<RegisterValidation>({
+    resolver: zodResolver(registerValidation),
+    mode: 'all',
+    defaultValues: {
+      expertiseOfArea: [],
+      role: Role.STUDENT,
+    },
   })
-
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-  }
 
   const handleCPFChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, '')
     value = value.replace(/(\d{3})(\d)/, '$1.$2')
     value = value.replace(/(\d{3})(\d)/, '$1.$2')
     value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2')
-    setFormData(prev => ({ ...prev, cpf: value }))
+    setValue('cpf', value)
   }
 
-  const validate = () => {
-    const newErrors: Record<string, string> = {}
+  const watchRole = watch('role')
+  const watchExpertiseArea = watch('expertiseOfArea')
 
-    if (!formData.name) newErrors.name = 'Campo obrigatório.'
-    if (!formData.email) newErrors.email = 'Campo obrigatório.'
-    if (!formData.password) newErrors.password = 'Campo obrigatório.'
-    if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'As senhas não coincidem.'
-    if (formData.role === 'student') {
-      if (!formData.birthDate) newErrors.birthDate = 'Informe a data de nascimento.'
-      if (!formData.cpf) newErrors.cpf = 'Informe o CPF.'
-    }
-
-    return newErrors
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const newErrors = validate()
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors)
-      return
-    }
-
-    setIsSubmitting(true)
+  async function handleSubmitRegisterForm(data: RegisterValidation) {
     try {
-      registerGatewayHttp.create({
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-        cpf: formData.cpf.replace(/\D/g, ''),
-        role: formData.role,
-        birthDate: formData.birthDate,
-        expertiseAreas: formData.role === 'mentor' ? formData.mentorField : undefined,
+      await registerGatewayHttp.create({
+        ...data,
+        cpf: data.cpf.replace(/\D/g, ''),
+        expertiseAreas: data.role === 'mentor' ? data.expertiseOfArea : undefined,
       })
-      console.log('Enviando dados', formData)
+
+      push(APP_ROUTES.login)
     } catch (error) {
       console.error(error)
-    } finally {
-      setIsSubmitting(false)
     }
   }
 
 
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit(handleSubmitRegisterForm)} className="space-y-6">
       <div className="space-y-4">
         <Input.Root>
           <Input.Label htmlFor="name">Nome completo</Input.Label>
-          <Input.Core
-            id="name"
-            name="name"
-            placeholder="Digite seu nome completo"
-            value={formData.name}
-            onChange={handleChange}
-          />
-          {errors.name && <p className="text-sm text-red-600">{errors.name}</p>}
+          <Input.Core id="name" placeholder="Digite seu nome completo" {...register('name')} />
+          {errors.name && <p className="text-sm text-red-600">{errors.name.message}</p>}
         </Input.Root>
 
         <Input.Root>
           <Input.Label htmlFor="email">E-mail</Input.Label>
-          <Input.Core
-            id="email"
-            name="email"
-            type="email"
-            placeholder="Digite seu e-mail"
-            value={formData.email}
-            onChange={handleChange}
-          />
-          {errors.email && <p className="text-sm text-red-600">{errors.email}</p>}
+          <Input.Core id="email" type="email" placeholder="Digite seu e-mail" {...register('email')} />
+          {errors.email && <p className="text-sm text-red-600">{errors.email.message}</p>}
         </Input.Root>
 
         <Input.Root>
           <Input.Label htmlFor="password">Senha</Input.Label>
-          <Input.Core
-            id="password"
-            name="password"
-            type="password"
-            placeholder="Crie uma senha"
-            value={formData.password}
-            onChange={handleChange}
-          />
-          {errors.password && <p className="text-sm text-red-600">{errors.password}</p>}
+          <Input.Core id="password" type="password" placeholder="Crie uma senha" {...register('password')} />
+          {errors.password && <p className="text-sm text-red-600">{errors.password.message}</p>}
         </Input.Root>
 
         <Input.Root>
           <Input.Label htmlFor="confirmPassword">Confirmar senha</Input.Label>
-          <Input.Core
-            id="confirmPassword"
-            name="confirmPassword"
-            type="password"
-            placeholder="Confirme sua senha"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-          />
-          {errors.confirmPassword && <p className="text-sm text-red-600">{errors.confirmPassword}</p>}
+          <Input.Core id="confirmPassword" type="password" placeholder="Confirme sua senha" {...register('confirmPassword')} />
+          {errors.confirmPassword && <p className="text-sm text-red-600">{errors.confirmPassword.message}</p>}
         </Input.Root>
 
         <Input.Root>
           <Input.Label htmlFor="cpf">CPF</Input.Label>
-          <Input.Core
-            id="cpf"
-            name="cpf"
-            placeholder="000.000.000-00"
-            maxLength={14}
-            value={formData.cpf}
-            onChange={handleCPFChange}
-          />
-          {errors.cpf && <p className="text-sm text-red-600">{errors.cpf}</p>}
+          <Input.Core id="cpf" placeholder="000.000.000-00" maxLength={14} {...register('cpf')} onChange={handleCPFChange} />
+          {errors.cpf && <p className="text-sm text-red-600">{errors.cpf.message}</p>}
         </Input.Root>
 
         <Input.Root>
           <Input.Label htmlFor="role">Tipo de usuário</Input.Label>
-          <Select value={formData.role}
+          <Select
             onValueChange={(value) =>
-              setFormData((prev) => ({ ...prev, role: value }))
+              setValue('role', value as Role, { shouldValidate: true })
             }>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Selecione seu tipo" />
@@ -175,102 +119,97 @@ export function Form() {
           </Select>
         </Input.Root>
 
-        {formData.role === 'student' && (
+        {watchRole === 'student' && (
           <>
             <Input.Root>
               <Input.Label htmlFor="birthDate">Data de nascimento</Input.Label>
-
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    className="w-full text-left font-normal border border-gray-300 px-3 py-2 rounded-md text-sm flex items-center justify-between"
-                  >
-                    {formData.birthDate ? format(formData.birthDate, "dd/MM/yyyy") : <span className="text-gray-400">Selecione a data</span>}
-                    <CalendarIcon className="ml-2 h-4 w-4 text-muted-foreground" />
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 bg-white" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={formData.birthDate}
-                    onSelect={(date) => {
-                      setFormData((prev) => ({ ...prev, birthDate: date ?? undefined }))
-                    }}
-                    locale={ptBR}
-                  />
-                </PopoverContent>
-              </Popover>
-
-              {errors.birthDate && <p className="text-sm text-red-600">{errors.birthDate}</p>}
+              <Controller
+                control={control}
+                name="birthDate"
+                render={({ field }) => (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        className="w-full text-left font-normal border border-gray-300 px-3 py-2 rounded-md text-sm flex items-center justify-between"
+                      >
+                        {field.value ? format(field.value, "dd/MM/yyyy") : <span className="text-gray-400">Selecione a data</span>}
+                        <CalendarIcon className="ml-2 h-4 w-4 text-muted-foreground" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 bg-white" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={(date) => field.onChange(date ?? undefined)}
+                        locale={ptBR}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />
+              {errors.birthDate && <p className="text-sm text-red-600">{errors.birthDate.message}</p>}
             </Input.Root>
-
-
-
           </>
         )}
 
-        {formData.role === 'mentor' && (
+        {watchRole === 'mentor' && (
           <Input.Root>
             <Input.Label>Áreas de atuação (máx. 3)</Input.Label>
+            <Controller
+              control={control}
+              name="expertiseOfArea"
+              render={({ field }) => {
+                const value = field.value ?? []
 
-            <Popover>
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  className={cn(
-                    "w-full min-h-[44px] px-3 py-2 border border-gray-300 rounded-md text-sm text-left",
-                    "flex flex-wrap items-start gap-1",
-                    "hover:border-[#5f2eea] focus:outline-none focus:ring-2 focus:ring-[#5f2eea]",
-                    formData.mentorField.length === 0 && "text-gray-400"
-                  )}
-                >
-                  {formData.mentorField.length > 0
-                    ? formData.mentorField.join(', ')
-                    : "Selecione até 3 áreas"}
-                </button>
-              </PopoverTrigger>
+                return (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        className={cn(
+                          "w-full min-h-[44px] px-3 py-2 border border-gray-300 rounded-md text-sm text-left",
+                          "flex flex-wrap items-start gap-1",
+                          "hover:border-[#5f2eea] focus:outline-none focus:ring-2 focus:ring-[#5f2eea]",
+                          value.length === 0 && "text-gray-400"
+                        )}
+                      >
+                        {value.length > 0 ? value.join(', ') : "Selecione até 3 áreas"}
+                      </button>
+                    </PopoverTrigger>
 
-              <PopoverContent className="w-full p-0 bg-white shadow-md rounded-md z-50">
-
-                <Command>
-                  <CommandInput placeholder="Buscar área..." className="border-b" />
-                  <CommandEmpty>Nenhuma área encontrada.</CommandEmpty>
-                  <CommandList>
-                    {["Educação", "Finanças", "Tecnologia", "Saúde", "Marketing", "Vendas"].map((area) => {
-                      const isSelected = formData.mentorField.includes(area)
-                      return (
-                        <CommandItem
-                          key={area}
-                          onSelect={() => {
-                            setFormData((prev) => {
-                              const alreadySelected = prev.mentorField.includes(area)
-                              if (alreadySelected) {
-                                return {
-                                  ...prev,
-                                  mentorField: prev.mentorField.filter((a) => a !== area),
-                                }
-                              }
-                              if (prev.mentorField.length >= 3) return prev
-                              return {
-                                ...prev,
-                                mentorField: [...prev.mentorField, area],
-                              }
-                            })
-                          }}
-                          className="flex justify-between border-none"
-                        >
-                          {area}
-                          {isSelected && <Check className="w-4 h-4 text-primary" />}
-                        </CommandItem>
-                      )
-                    })}
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-
-            {formData.mentorField.length >= 3 && (
+                    <PopoverContent className="w-full p-0 bg-white shadow-md rounded-md z-50">
+                      <Command>
+                        <CommandInput placeholder="Buscar área..." className="border-b" />
+                        <CommandEmpty>Nenhuma área encontrada.</CommandEmpty>
+                        <CommandList>
+                          {AREA_OPTIONS.map((area) => {
+                            const isSelected = value.includes(area)
+                            return (
+                              <CommandItem
+                                key={area}
+                                onSelect={() => {
+                                  if (isSelected) {
+                                    field.onChange(value.filter((a) => a !== area))
+                                  } else if (value.length < 3) {
+                                    field.onChange([...value, area])
+                                  }
+                                }}
+                                className="flex justify-between border-none"
+                              >
+                                {area}
+                                {isSelected && <Check className="w-4 h-4 text-primary" />}
+                              </CommandItem>
+                            )
+                          })}
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                )
+              }}
+            />
+            {Array.isArray(watchExpertiseArea) && watchExpertiseArea.length >= 3 && (
               <p className="text-xs text-red-500 mt-2">Máximo de 3 áreas selecionadas.</p>
             )}
           </Input.Root>
