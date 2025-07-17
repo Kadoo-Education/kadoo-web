@@ -22,11 +22,8 @@ import { registerValidation } from '@/validation/validators/register/register-va
 
 const AREA_OPTIONS = ["Educação", "Finanças", "Tecnologia", "Saúde", "Marketing", "Vendas"]
 
-
 export function Form() {
-
   const { push } = useRouter()
-
 
   const {
     register,
