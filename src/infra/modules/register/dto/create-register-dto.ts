@@ -7,5 +7,6 @@ export interface CreateRegisterDTO {
   cpf: string
   role: Role
   birthDate?: Date
-  expertiseAreas?: string[]
+  area?: string[]
+  description?: string
 }

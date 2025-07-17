@@ -36,7 +36,6 @@ export function Form() {
     resolver: zodResolver(registerValidation),
     mode: 'all',
     defaultValues: {
-      expertiseOfArea: [],
       role: Role.STUDENT,
     },
   })
@@ -50,14 +49,15 @@ export function Form() {
   }
 
   const watchRole = watch('role')
-  const watchExpertiseArea = watch('expertiseOfArea')
+  const watchExpertiseArea = watch('area')
 
   async function handleSubmitRegisterForm(data: RegisterValidation) {
     try {
       await registerGatewayHttp.create({
+
         ...data,
         cpf: data.cpf.replace(/\D/g, ''),
-        expertiseAreas: data.role === 'mentor' ? data.expertiseOfArea : undefined,
+        area: data.area
       })
 
       push(APP_ROUTES.login)
@@ -154,7 +154,7 @@ export function Form() {
             <Input.Label>Áreas de atuação (máx. 3)</Input.Label>
             <Controller
               control={control}
-              name="expertiseOfArea"
+              name="area"
               render={({ field }) => {
                 const value = field.value ?? []
 

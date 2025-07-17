@@ -3,28 +3,27 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --font-poppins: 'Poppins', sans-serif;
+  --font-poppins: "Poppins", sans-serif;
 }
 
 @theme {
-  --animate-bounce-logo: bounce-logo 1s ease-in-out infinite alternate;
-
   @keyframes bounce-logo {
     0% {
-      opacity: 0;
-      transform: scale(0.95);
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-15px);
     }
     100% {
-      opacity: 1;
-      transform: scale(1);
+      transform: translateY(0);
     }
   }
-}
 
+  --animate-bounce-logo: bounce-logo 1s ease-in-out infinite alternate;
+}
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-poppins), sans-serif;
 }
-

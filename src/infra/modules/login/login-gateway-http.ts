@@ -8,6 +8,7 @@ import { jsCookieBrowserStorage } from "@/infra/external/storage/js-cookie-brows
 export class LoginGatewayHttp implements LoginGateway {
 
   constructor(private readonly client: HttpClient, private readonly storage: BrowserStorage) { }
+ 
 
   async login(user: LoginRequestDTO): Promise<void> {
 
@@ -20,6 +21,10 @@ export class LoginGatewayHttp implements LoginGateway {
     const { token } = result.value
 
     this.storage.set(process.env.NEXT_PUBLIC_TOKEN_NAME, token)
+  }
+
+  async logout(): Promise<void> {
+    this.storage.delete(process.env.NEXT_PUBLIC_TOKEN_NAME)
   }
 }
 

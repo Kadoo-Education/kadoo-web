@@ -9,7 +9,7 @@ export const registerValidation = z.object({
   cpf: z.string().min(11, 'Informe um CPF válido.').max(14),
   role: z.enum([Role.STUDENT, Role.MENTOR]),
   birthDate: z.date().min(new Date('1900-01-01'), 'Informe uma data de nascimento válida.').optional(),
-  expertiseOfArea: z.array(z.string()).max(3, 'Máximo de 3 áreas.').optional(),
+  area: z.array(z.string()).max(3, 'Máximo de 3 áreas.').optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "As senhas não coincidem.",
   path: ["confirmPassword"],

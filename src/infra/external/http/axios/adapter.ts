@@ -17,7 +17,7 @@ export class AxiosAdapter implements HttpClient {
       const token = this.getToken();
 
       if (token) {
-        config.headers.Authorization = token;
+        config.headers.Authorization = `Bearer ${token}`;
       }
       return config;
     });

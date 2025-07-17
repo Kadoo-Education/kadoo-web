@@ -12,7 +12,7 @@ export function Loading() {
   }, [])
 
   return (
-    <section className="fixed w-screen h-screen inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-[15px] overflow-hidden max-w-full">
+    <section className="fixed w-screen h-screen inset-0 z-[9999] flex items-center justify-center bg-black backdrop-blur-[15px] overflow-hidden max-w-full">
       <div className="flex flex-col items-center">
         <Image
           src="/loading.png"

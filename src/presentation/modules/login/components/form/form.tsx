@@ -8,8 +8,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { loginValidation } from "@/validation/validators/login/login-validation";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { APP_ROUTES } from "@/shared/constants/route";
 
 export function Form() {
+  const { push } = useRouter()
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -26,6 +29,7 @@ export function Form() {
     try {
       await loginGatewayHttp.login(data);
       alert("Login realizado com sucesso!");
+      push(APP_ROUTES.home);
     } catch (error) {
       console.error("Erro ao fazer login:", error);
     } finally {

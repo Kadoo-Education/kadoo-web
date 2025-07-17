@@ -5,7 +5,7 @@ import { Role } from "@/business/domain/role";
 
 export class RegisterGatewayHttp implements RegisterGateway {
 
-  constructor(private readonly client: HttpClient){}
+  constructor(private readonly client: HttpClient) { }
 
   async create(user: CreateRegisterDTO): Promise<void> {
 
@@ -16,9 +16,9 @@ export class RegisterGatewayHttp implements RegisterGateway {
       [Role.MENTOR]: '/mentor-profile'
     }
 
-    const result = await this.client.post(url[user.role], user)
+    const result = await this.client.post(url[user.role], { description: "", linkedin: "linkedin.com", ...user })
 
-    if(result.isLeft()) {
+    if (result.isLeft()) {
       throw new Error("Ocorreu um erro ao criar o usuário")
     }
   }
