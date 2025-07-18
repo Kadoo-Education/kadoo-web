@@ -9,8 +9,6 @@ export class RegisterGatewayHttp implements RegisterGateway {
 
   async create(user: CreateRegisterDTO): Promise<void> {
 
-    console.table(user)
-
     const url = {
       [Role.STUDENT]: '/student-profile',
       [Role.MENTOR]: '/mentor-profile'

@@ -1,10 +1,8 @@
 "use client"
 
-import type React from "react"
 
 import { useState } from "react"
-import { Calendar, Upload, Users, Tag, FileText, Target, ImageIcon, X } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/presentation/external/components/ui/avatar"
+import { Calendar, Tag, FileText, Target } from "lucide-react"
 import { Badge } from "@/presentation/external/components/ui/badge"
 import { Button } from "@/presentation/external/components/ui/button"
 import { Card, CardContent } from "@/presentation/external/components/ui/card"
@@ -15,6 +13,8 @@ import { Checkbox } from "@/presentation/external/components/ui/checkbox"
 import { Separator } from "@/presentation/external/components/ui/separator"
 import { toast } from "sonner"
 import Image from "next/image"
+import { edictGatewayHttp } from "@/infra/modules/edict/edict-gateway-http"
+import { APP_ROUTES } from "@/shared/constants/route"
 
 const availableMentors = [
   { id: 1, name: "Ana Silva", area: "Marketing Digital", avatar: "/placeholder.svg?height=40&width=40" },
@@ -51,7 +51,6 @@ export default function CreateProgram() {
     selectedMentors: [] as number[],
   })
 
-  const [dragActive, setDragActive] = useState(false)
 
   const handleInputChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -66,41 +65,19 @@ export default function CreateProgram() {
     }))
   }
 
-  const handleMentorToggle = (mentorId: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      selectedMentors: prev.selectedMentors.includes(mentorId)
-        ? prev.selectedMentors.filter((id) => id !== mentorId)
-        : [...prev.selectedMentors, mentorId],
-    }))
-  }
-
-  const handleFileUpload = (file: File) => {
-    setFormData((prev) => ({ ...prev, bannerImage: file }))
-  }
-
-  const handleDrag = (e: React.DragEvent) => {
+ 
+  const handlePublish = (e) => {
     e.preventDefault()
-    e.stopPropagation()
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true)
-    } else if (e.type === "dragleave") {
-      setDragActive(false)
-    }
-  }
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setDragActive(false)
+    edictGatewayHttp.create({
+      description: formData.shortDescription,
+      title: formData.title,
+      startDate: new Date(formData.startDate),
+      endDate: new Date(formData.endDate),
+      tag: formData.selectedCategories,
+    })
 
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFileUpload(e.dataTransfer.files[0])
-    }
-  }
-
-  const handlePublish = () => {
-    toast.error("Programa publicado com sucesso!")
+    toast.success("Dados enviados! Veja o console.")
   }
 
   return (
@@ -108,10 +85,10 @@ export default function CreateProgram() {
       <header className="bg-white border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-             <Image src="/icons/logo.svg" width={140} height={50} alt="Logo da Kadoo" />
+            <Image src="/icons/logo.svg" width={140} height={50} alt="Logo da Kadoo" />
 
             <nav className="hidden md:flex items-center space-x-8">
-              <a href="#" className="text-gray-600 hover:text-[#5127FF] transition-colors">
+              <a href={APP_ROUTES.home} className="text-gray-600 hover:text-[#5127FF] transition-colors">
                 Home
               </a>
               <a href="#" className="text-[#5127FF] font-medium">
@@ -141,7 +118,7 @@ export default function CreateProgram() {
 
         <Card className="shadow-lg border-0">
           <CardContent className="p-8">
-            <form className="space-y-8">
+            <form className="space-y-8" onSubmit={handlePublish}>
               <div className="space-y-6">
                 <div className="flex items-center gap-2 mb-4">
                   <FileText className="w-5 h-5 text-[#5127FF]" />
@@ -197,7 +174,7 @@ export default function CreateProgram() {
               <div className="space-y-6">
                 <div className="flex items-center gap-2 mb-4">
                   <Calendar className="w-5 h-5 text-[#5127FF]" />
-                  <h2 className="text-xl font-semibold text-gray-900">Datas e Vagas</h2>
+                  <h2 className="text-xl font-semibold text-gray-900">Datas</h2>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -361,7 +338,7 @@ export default function CreateProgram() {
 
               <Separator />
 
-              <div className="space-y-6">
+              {/* <div className="space-y-6">
                 <div className="flex items-center gap-2 mb-4">
                   <Users className="w-5 h-5 text-[#5127FF]" />
                   <h2 className="text-xl font-semibold text-gray-900">Mentores Envolvidos</h2>
@@ -403,18 +380,17 @@ export default function CreateProgram() {
                     ))}
                   </div>
                 </div>
-              </div>
+              </div> */}
 
               <div className="flex flex-col sm:flex-row gap-4 pt-6">
                 <Button
-                  type="button"
-                  onClick={handlePublish}
+                  type="submit"
                   className="bg-[#F4DA02] text-black hover:bg-[#F4DA02]/90 font-semibold px-8 py-3 h-auto"
                 >
-                  Publicar Programa
+                  Publicar Edital
                 </Button>
-               
-                <Button type="button" variant="ghost" className="text-gray-600 hover:text-gray-800 px-8 py-3 h-auto">
+
+                <Button type="reset" variant="ghost" className="text-gray-600 hover:text-gray-800 px-8 py-3 h-auto">
                   Cancelar
                 </Button>
               </div>

@@ -25,7 +25,7 @@ export function HomeSideBar({ userIsMentor }: HomeSideBarProps) {
   const { push } = useRouter()
 
   const allMenuItems = [
-    { title: "Home", icon: Home, url: "#", isActive: true },
+    { title: "Home", icon: Home, url: APP_ROUTES.home, isActive: true },
     { title: "Editais", icon: FileText, url: APP_ROUTES.create_edict, onlyMentor: true },
     { title: "Mentores", icon: UsersIcon, url: "#", },
     { title: "Meu progresso", icon: BarChart3, url: "#" },

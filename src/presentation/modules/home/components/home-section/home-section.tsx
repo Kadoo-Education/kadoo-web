@@ -13,6 +13,8 @@ import { useCallback, useEffect, useState } from "react";
 import { userGatewayHttp } from "@/infra/modules/user/user-gateway-http";
 import { EnumProfile, Profile } from "@/presentation/shared/layout/components/profile/profile";
 import { Loading } from "@/presentation/shared/layout/components/loading/loading";
+import { edictGatewayHttp } from "@/infra/modules/edict/edict-gateway-http";
+import { GetAllEdictDTO } from "@/infra/modules/edict/dto/get-all-edict-dto";
 
 const mentores = [
   {
@@ -49,45 +51,24 @@ const mentores = [
   },
 ]
 
-const editais = [
-  {
-    id: 1,
-    title: "Programa de Aceleração Tech 2024",
-    description: "Programa focado em startups de tecnologia com mentoria especializada e investimento inicial.",
-    startDate: "15 Jan 2024",
-    endDate: "30 Jan 2024",
-    category: "Tecnologia",
-  },
-  {
-    id: 2,
-    title: "Impacto Social - Edital Especial",
-    description: "Voltado para startups que geram impacto social positivo em comunidades de baixa renda.",
-    startDate: "20 Jan 2024",
-    endDate: "05 Fev 2024",
-    category: "Impacto Social",
-  },
-  {
-    id: 3,
-    title: "Inovação Sustentável",
-    description: "Para startups focadas em soluções sustentáveis e economia circular.",
-    startDate: "25 Jan 2024",
-    endDate: "10 Fev 2024",
-    category: "Sustentabilidade",
-  },
-]
-
 export function HomeSection() {
 
   const [user, setUser] = useState<{ name: string, role: EnumProfile } | null>(null)
+  const [edict, setEdict] = useState<GetAllEdictDTO[] | null>(null)
 
   const getUser = useCallback(async () => {
     await userGatewayHttp.get().then(setUser)
+  }, [])
+
+  const getAllEdicts = useCallback(async () => {
+    await edictGatewayHttp.getAll().then(setEdict)
   }, [])
   
 
   useEffect(() => {
     getUser()
-  }, [getUser])
+    getAllEdicts()
+  }, [getUser, getAllEdicts])
 
   if (!user) return <Loading />
 
@@ -178,7 +159,7 @@ export function HomeSection() {
 
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-900">Editais Abertos</h2>
+                <h2 className="text-2xl font-bold text-gray-900">Editais</h2>
                 <Button
                   variant="outline"
                   className="border-[#5127FF] text-[#5127FF] hover:bg-[#5127FF] hover:text-white"
@@ -188,29 +169,29 @@ export function HomeSection() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {editais.map((edital) => (
-                  <Card key={edital.id} className="hover:shadow-lg transition-shadow">
+                {edict?.map((edict) => (
+                  <Card key={edict.id} className="hover:shadow-lg transition-shadow">
                     <CardHeader>
                       <div className="flex items-start justify-between gap-2">
-                        <CardTitle className="text-lg leading-tight">{edital.title}</CardTitle>
+                        <CardTitle className="text-lg leading-tight">{edict.title}</CardTitle>
                         <Badge variant="secondary" className="bg-[#F4DA02]/20 text-[#5127FF] shrink-0">
-                          {edital.category}
+                          {edict.category}
                         </Badge>
                       </div>
-                      <CardDescription className="text-sm">{edital.description}</CardDescription>
+                      <CardDescription className="text-sm">{edict.description}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="flex items-center gap-4 text-sm text-gray-600">
                         <div className="flex items-center gap-1">
                           <Calendar className="w-4 h-4" />
-                          <span>{edital.startDate}</span>
+                          <span>{new Date(edict.startDate).toLocaleDateString()}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <Clock className="w-4 h-4" />
-                          <span>{edital.endDate}</span>
+                          <span>{new Date(edict.endDate).toLocaleDateString()}</span>
                         </div>
                       </div>
-                      <Button className="w-full bg-[#5127FF] hover:bg-[#5127FF]/90">Inscrever-se</Button>
+                      <Button className="w-full text-white bg-[#5127FF] hover:bg-[#5127FF]/90">Inscrever-se</Button>
                     </CardContent>
                   </Card>
                 ))}
