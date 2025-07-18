@@ -3,18 +3,18 @@
 import { Button } from "@/presentation/external/components/ui/button";
 import { SidebarInset, SidebarProvider } from "@/presentation/external/components/ui/sidebar";
 import { HomeSideBar } from "@/presentation/shared/layout/components/sidebar";
-import { /*Bell */ Calendar, Clock, Star, TrendingUp, Users } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/presentation/external/components/ui/card";
+import { /*Bell */ Calendar, Star, TrendingUp, Users } from "lucide-react";
 import { Progress } from "@/presentation/external/components/ui/progress";
-import { Badge } from "@/presentation/external/components/ui/badge";
 import { Header } from "@/presentation/shared/layout/components/header/header";
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
 import { useCallback, useEffect, useState } from "react";
 import { userGatewayHttp } from "@/infra/modules/user/user-gateway-http";
 import { EnumProfile, Profile } from "@/presentation/shared/layout/components/profile/profile";
 import { Loading } from "@/presentation/shared/layout/components/loading/loading";
-import { edictGatewayHttp } from "@/infra/modules/edict/edict-gateway-http";
-import { GetAllEdictDTO } from "@/infra/modules/edict/dto/get-all-edict-dto";
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/presentation/external/components/ui/card";
+import { EdictDetails } from "@/presentation/modules/edict/view/components/edict-details/edict-details";
+
 
 const mentores = [
   {
@@ -54,21 +54,17 @@ const mentores = [
 export function HomeSection() {
 
   const [user, setUser] = useState<{ name: string, role: EnumProfile } | null>(null)
-  const [edict, setEdict] = useState<GetAllEdictDTO[] | null>(null)
 
   const getUser = useCallback(async () => {
     await userGatewayHttp.get().then(setUser)
   }, [])
 
-  const getAllEdicts = useCallback(async () => {
-    await edictGatewayHttp.getAll().then(setEdict)
-  }, [])
+  
   
 
   useEffect(() => {
     getUser()
-    getAllEdicts()
-  }, [getUser, getAllEdicts])
+  }, [getUser])
 
   if (!user) return <Loading />
 
@@ -76,7 +72,6 @@ export function HomeSection() {
 
   const userIsMentor = user.role === EnumProfile.ROLE_MENTOR;
 
-  console.log(userIsMentor)
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -157,46 +152,7 @@ export function HomeSection() {
               </Card>
             </div>
 
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-900">Editais</h2>
-                <Button
-                  variant="outline"
-                  className="border-[#5127FF] text-[#5127FF] hover:bg-[#5127FF] hover:text-white"
-                >
-                  Ver Todos
-                </Button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {edict?.map((edict) => (
-                  <Card key={edict.id} className="hover:shadow-lg transition-shadow">
-                    <CardHeader>
-                      <div className="flex items-start justify-between gap-2">
-                        <CardTitle className="text-lg leading-tight">{edict.title}</CardTitle>
-                        <Badge variant="secondary" className="bg-[#F4DA02]/20 text-[#5127FF] shrink-0">
-                          {edict.category}
-                        </Badge>
-                      </div>
-                      <CardDescription className="text-sm">{edict.description}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex items-center gap-4 text-sm text-gray-600">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4" />
-                          <span>{new Date(edict.startDate).toLocaleDateString()}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          <span>{new Date(edict.endDate).toLocaleDateString()}</span>
-                        </div>
-                      </div>
-                      <Button className="w-full text-white bg-[#5127FF] hover:bg-[#5127FF]/90">Inscrever-se</Button>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
+           <EdictDetails />
 
             <div className="space-y-6">
               <div className="flex items-center justify-between">
