@@ -5,5 +5,6 @@ export interface GetAllEdictDTO {
   description: string
   startDate: Date
   endDate: Date
-  tag: string[]
+  tags: string[]
+  isSubscribed: boolean
 }

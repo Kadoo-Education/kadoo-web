@@ -6,7 +6,7 @@ import { HomeSideBar } from "@/presentation/shared/layout/components/sidebar";
 import { /*Bell */ Calendar, Star, TrendingUp, Users } from "lucide-react";
 import { Progress } from "@/presentation/external/components/ui/progress";
 import { Header } from "@/presentation/shared/layout/components/header/header";
-import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/presentation/external/components/ui/avatar";
 import { useCallback, useEffect, useState } from "react";
 import { userGatewayHttp } from "@/infra/modules/user/user-gateway-http";
 import { EnumProfile, Profile } from "@/presentation/shared/layout/components/profile/profile";
@@ -59,9 +59,6 @@ export function HomeSection() {
     await userGatewayHttp.get().then(setUser)
   }, [])
 
-  
-  
-
   useEffect(() => {
     getUser()
   }, [getUser])
@@ -70,13 +67,14 @@ export function HomeSection() {
 
   const firstName = user?.name.split(" ")[0]
 
-  const userIsMentor = user.role === EnumProfile.ROLE_MENTOR;
+  const role = user.role
+
 
 
   return (
     <div className="bg-gray-50 min-h-screen">
       <SidebarProvider>
-        <HomeSideBar userIsMentor={userIsMentor}/>
+        <HomeSideBar role={role} />
         <SidebarInset>
           <Header profile={<Profile {...user} />}/>
 

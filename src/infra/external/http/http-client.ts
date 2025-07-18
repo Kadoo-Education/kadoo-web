@@ -1,4 +1,4 @@
-import { Either } from "@/infra/shared/either";
+import { Either } from "@/infra/shared/utils/either";
 
 export interface HttpClient {
   post<Result>(url: string, body: object): Promise<Either<Error, Result>>;

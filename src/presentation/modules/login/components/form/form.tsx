@@ -9,7 +9,7 @@ import { loginValidation } from "@/validation/validators/login/login-validation"
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { APP_ROUTES } from "@/shared/constants/route";
+import { APP_ROUTES } from "@/shared/constants/routes";
 
 export function Form() {
   const { push } = useRouter()

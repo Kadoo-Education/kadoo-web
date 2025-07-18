@@ -14,7 +14,9 @@ import { Separator } from "@/presentation/external/components/ui/separator"
 import { toast } from "sonner"
 import Image from "next/image"
 import { edictGatewayHttp } from "@/infra/modules/edict/edict-gateway-http"
-import { APP_ROUTES } from "@/shared/constants/route"
+import { APP_ROUTES } from "@/shared/constants/routes"
+
+import { CldUploadButton } from 'next-cloudinary';
 
 const availableMentors = [
   { id: 1, name: "Ana Silva", area: "Marketing Digital", avatar: "/placeholder.svg?height=40&width=40" },
@@ -65,7 +67,7 @@ export default function CreateProgram() {
     }))
   }
 
- 
+
   const handlePublish = (e) => {
     e.preventDefault()
 
@@ -154,7 +156,7 @@ export default function CreateProgram() {
                     <div className="text-right text-sm text-gray-500 mt-1">{formData.shortDescription.length}/300</div>
                   </div>
 
-                  <div>
+                  {/* <div>
                     <Label htmlFor="fullDescription" className="text-sm font-medium text-gray-700 mb-2 block">
                       Descrição Completa *
                     </Label>
@@ -165,7 +167,7 @@ export default function CreateProgram() {
                       onChange={(e) => handleInputChange("fullDescription", e.target.value)}
                       className="min-h-[200px] rounded-lg border-gray-200 focus:border-[#5127FF] focus:ring-[#5127FF] resize-none"
                     />
-                  </div>
+                  </div> */}
                 </div>
               </div>
 
@@ -204,11 +206,16 @@ export default function CreateProgram() {
                     />
                   </div>
                 </div>
+
+                <CldUploadButton
+                  uploadPreset="kadoo-api"
+                  signatureEndpoint="/api/cloudinary"
+                />
               </div>
 
               <Separator />
 
-              <div className="space-y-6">
+              {/* <div className="space-y-6">
                 <div className="flex items-center gap-2 mb-4">
                   <Target className="w-5 h-5 text-[#5127FF]" />
                   <h2 className="text-xl font-semibold text-gray-900">Requisitos</h2>
@@ -226,7 +233,7 @@ export default function CreateProgram() {
                     className="min-h-[120px] rounded-lg border-gray-200 focus:border-[#5127FF] focus:ring-[#5127FF] resize-none"
                   />
                 </div>
-              </div>
+              </div> */}
 
               {/* <Separator /> */}
 

@@ -11,29 +11,30 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/presentation/external/components/ui/sidebar"
-import { APP_ROUTES } from "@/shared/constants/route"
+import { APP_ROUTES } from "@/shared/constants/routes"
 
 import { Home, FileText, UsersIcon, BarChart3, LogOut } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import { EnumProfile } from "./profile/profile"
 interface HomeSideBarProps {
-  userIsMentor: boolean
+  role: EnumProfile
 }
 
-export function HomeSideBar({ userIsMentor }: HomeSideBarProps) {
+export function HomeSideBar({ role }: HomeSideBarProps) {
 
   const { push } = useRouter()
 
   const allMenuItems = [
-    { title: "Home", icon: Home, url: APP_ROUTES.home, isActive: true },
-    { title: "Editais", icon: FileText, url: APP_ROUTES.create_edict, onlyMentor: true },
-    { title: "Mentores", icon: UsersIcon, url: "#", },
+    { title: "Home", icon: Home, url: APP_ROUTES.home },
+    { title: "Editais", icon: FileText, url: APP_ROUTES.create_edict, onlyEnterprise: true },
+    { title: "Mentores", icon: UsersIcon, url: "#" },
     { title: "Meu progresso", icon: BarChart3, url: "#" },
   ]
 
   const menuItems = allMenuItems.filter(item => {
-    if (item.onlyMentor) return userIsMentor
-    return true
+    if (!item.onlyEnterprise) return true
+    return role === EnumProfile.ROLE_ENTERPRISE || role === EnumProfile.ROLE_ADMIN
   })
 
   async function handleLogOut() {
@@ -55,7 +56,6 @@ export function HomeSideBar({ userIsMentor }: HomeSideBarProps) {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
-                    isActive={item.isActive}
                     className="data-[active=true]:bg-[#5127FF] data-[active=true]:text-white hover:bg-[#5127FF]/10"
                   >
                     <a href={item.url} className="flex items-center gap-3">

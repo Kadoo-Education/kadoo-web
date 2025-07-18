@@ -7,14 +7,18 @@ interface ProfileProps {
 
 export enum EnumProfile {
   ROLE_STUDENT = "ROLE_STUDENT",
-  ROLE_MENTOR = "ROLE_MENTOR"
+  ROLE_MENTOR = "ROLE_MENTOR",
+  ROLE_ENTERPRISE = "ROLE_ENTERPRISE",
+  ROLE_ADMIN = "ROLE_ADMIN"
 }
 
 export function Profile({ name, role }: ProfileProps) {
 
   const ROLE_USER = {
     [EnumProfile.ROLE_STUDENT]: "Estudante",
-    [EnumProfile.ROLE_MENTOR]: "Mentor"
+    [EnumProfile.ROLE_MENTOR]: "Mentor",
+    [EnumProfile.ROLE_ENTERPRISE]: "Empresa",
+    [EnumProfile.ROLE_ADMIN]: "Administrador"
   }
 
   const firstLetter = name?.charAt(0).toUpperCase();

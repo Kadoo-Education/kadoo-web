@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { Form } from "../form/form";
-import { APP_ROUTES } from "@/shared/constants/route";
+import { APP_ROUTES } from "@/shared/constants/routes";
 
 export function LoginSection() {
   return (

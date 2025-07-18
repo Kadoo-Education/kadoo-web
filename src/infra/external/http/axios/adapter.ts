@@ -1,4 +1,4 @@
-import { Either, left, right } from "@/infra/shared/either";
+import { Either, left, right } from "@/infra/shared/utils/either";
 import { HttpClient } from "@/infra/external/http/http-client";
 import axios, { AxiosInstance, isAxiosError } from "axios";
 import { jsCookieBrowserStorage } from "@/infra/external/storage/js-cookie-browser-storage";
