@@ -2,7 +2,7 @@ import { v2 as cloudinary } from "cloudinary";
 import { NextRequest } from "next/server";
 
 cloudinary.config({
-  cloud_name: "dbsps2niwdbsps2niw",
+  cloud_name: "dbsps2niw",
   api_key: "782717586434214",
   api_secret: "sXhQP-x_4xZDClPtkhlnPZP8boY",
 });

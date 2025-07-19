@@ -2,7 +2,7 @@
 
 
 import { useState } from "react"
-import { Calendar, Tag, FileText, Target } from "lucide-react"
+import { Calendar, Tag, FileText, Target, Upload } from "lucide-react"
 import { Badge } from "@/presentation/external/components/ui/badge"
 import { Button } from "@/presentation/external/components/ui/button"
 import { Card, CardContent } from "@/presentation/external/components/ui/card"
@@ -40,6 +40,9 @@ const availableCategories = [
 ]
 
 export default function CreateProgram() {
+
+  const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null)
+
   const [formData, setFormData] = useState({
     title: "",
     shortDescription: "",
@@ -207,10 +210,30 @@ export default function CreateProgram() {
                   </div>
                 </div>
 
-                <CldUploadButton
-                  uploadPreset="kadoo-api"
-                  signatureEndpoint="/api/cloudinary"
-                />
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700 block">Arquivo PDF do edital</Label>
+
+                  <CldUploadButton
+                    uploadPreset="kadoo-api"
+                    signatureEndpoint="/api/cloudinary"
+                    options={{ resourceType: "raw" }}
+                    onSuccess={(result: any) => {
+                      const url = result?.info?.secure_url
+                      console.log("Upload concluído:", url)
+                      setUploadedFileUrl(url)
+                    }}
+                    className="inline-flex items-center justify-center gap-2 rounded-md border border-[#5127FF] bg-transparent px-4 py-2 text-sm font-medium text-[#5127FF] transition-colors hover:bg-[#5127FF] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5127FF] focus-visible:ring-offset-2"
+                  >
+                    <Upload className="w-4 h-4" />
+                    Enviar PDF do Edital
+                  </CldUploadButton>
+
+                  {uploadedFileUrl && (
+                    <p className="text-sm text-green-600 mt-1">
+                      Arquivo enviado com sucesso! <a href={uploadedFileUrl} className="underline" target="_blank">Ver PDF</a>
+                    </p>
+                  )}
+                </div>
               </div>
 
               <Separator />
