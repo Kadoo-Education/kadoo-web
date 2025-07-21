@@ -15,7 +15,6 @@ import {
   Search, 
   Filter, 
   MapPin, 
-  Calendar,
   ChevronDown,
   Clock,
   Award,

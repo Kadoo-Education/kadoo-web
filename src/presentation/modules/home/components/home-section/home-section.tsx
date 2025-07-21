@@ -11,8 +11,7 @@ import { useCallback, useEffect, useState } from "react";
 import { userGatewayHttp } from "@/infra/modules/user/user-gateway-http";
 import { EnumProfile, Profile } from "@/presentation/shared/layout/components/profile/profile";
 import { Loading } from "@/presentation/shared/layout/components/loading/loading";
-import { Card, CardContent, CardHeader, CardTitle } from "@/presentation/external/components/ui/card";
-import { EdictDetails } from "@/presentation/modules/edict/view/components/edict-details/edict-details";
+import { Card, CardContent } from "@/presentation/external/components/ui/card";
 
 import Link from "next/link";
 
