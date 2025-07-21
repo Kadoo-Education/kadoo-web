@@ -14,6 +14,8 @@ import { Loading } from "@/presentation/shared/layout/components/loading/loading
 import { Card, CardContent, CardHeader, CardTitle } from "@/presentation/external/components/ui/card";
 import { EdictDetails } from "@/presentation/modules/edict/view/components/edict-details/edict-details";
 
+import Link from "next/link";
+
 const mentores = [
   {
     id: 1,
@@ -407,6 +409,7 @@ export function HomeSection() {
                   <h2 className="text-3xl font-bold text-gray-900">Mentores em Destaque</h2>
                   <p className="text-gray-600">Conecte-se com especialistas que vão acelerar sua jornada</p>
                 </div>
+                <Link href="/mentores">
                 <Button
                   variant="outline"
                   size="lg"
@@ -414,6 +417,8 @@ export function HomeSection() {
                 >
                   Ver Todos os Mentores
                 </Button>
+                </Link>
+                
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -482,12 +487,16 @@ export function HomeSection() {
                 <div className="text-center space-y-4">
                   <h3 className="text-2xl font-bold text-gray-900">Não encontrou o mentor ideal?</h3>
                   <p className="text-gray-600 text-lg">Temos mais de 50+ mentores especialistas esperando para ajudar você</p>
+                  
+                  <Link href="/mentores">
                   <Button
                     size="lg"
                     className="bg-gradient-to-r from-[#5127FF] to-[#5127FF]/90 hover:from-[#5127FF]/90 hover:to-[#5127FF] text-white font-semibold px-8 py-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
                   >
                     Explorar Todos os Mentores
                   </Button>
+                  </Link>
+                  
                 </div>
               </div>
             </div>
