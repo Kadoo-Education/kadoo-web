@@ -74,7 +74,7 @@ export function HomeSection() {
       <SidebarProvider>
         <HomeSideBar role={role} />
         <SidebarInset>
-          <Header profile={<Profile {...user} />}/>
+          <Header profile={<Profile {...user} />} />
 
           <main className="p-6 space-y-8">
             {/* Hero Section */}
@@ -186,14 +186,14 @@ export function HomeSection() {
                 {/* Edital 1 */}
                 <Card className="group relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 bg-white">
                   <div className="absolute inset-0 bg-gradient-to-br from-[#5127FF]/5 to-[#F4DA02]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  
+
                   {/* Badge de Status */}
                   <div className="absolute top-4 right-4 z-10">
                     <span className="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
                       Inscrito ✓
                     </span>
                   </div>
-                  
+
                   <CardContent className="p-6 relative z-10">
                     <div className="space-y-4">
                       {/* Ícone e Tag */}
@@ -205,7 +205,7 @@ export function HomeSection() {
                           Tecnologia
                         </div>
                       </div>
-                      
+
                       {/* Título e Descrição */}
                       <div className="space-y-2">
                         <h3 className="font-bold text-xl text-gray-900 group-hover:text-[#5127FF] transition-colors duration-300">
@@ -215,19 +215,28 @@ export function HomeSection() {
                           Venha participar desse programa para startups de tecnologia
                         </p>
                       </div>
-                      
+
                       {/* Datas */}
-                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl group-hover:bg-white group-hover:shadow-sm transition-all duration-300">
-                        <div className="flex items-center gap-2 text-sm">
+                      <div className="flex items-center gap-4 bg-gray-100 rounded-xl px-4 py-3 group-hover:bg-white group-hover:shadow transition-all duration-300 justify-between">
+                        <div className="flex flex-col items-start gap-2">
                           <Calendar className="w-4 h-4 text-[#5127FF]" />
-                          <span className="font-medium">17/07/2025</span>
+                          <div className="flex flex-col leading-tight">
+                            <span className="text-[11px] text-gray-500 uppercase tracking-wide">Início</span>
+                            <span className="text-sm font-medium text-gray-800">17/07/2025</span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <span className="text-gray-500">até</span>
-                          <span className="font-medium">17/07/2025</span>
+
+                        
+
+                        <div className="flex flex-col items-start gap-2">
+                          <Calendar className="w-4 h-4 text-[#5127FF]" />
+                          <div className="flex flex-col leading-tight">
+                            <span className="text-[11px] text-gray-500 uppercase tracking-wide">Término</span>
+                            <span className="text-sm font-medium text-gray-800">17/07/2025</span>
+                          </div>
                         </div>
                       </div>
-                      
+
                       {/* Status */}
                       <div className="text-center py-2">
                         <span className="text-green-600 font-semibold text-sm bg-green-50 px-4 py-2 rounded-lg">
@@ -241,14 +250,14 @@ export function HomeSection() {
                 {/* Edital 2 */}
                 <Card className="group relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 bg-white">
                   <div className="absolute inset-0 bg-gradient-to-br from-[#5127FF]/5 to-[#F4DA02]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  
+
                   {/* Badge de Status */}
                   <div className="absolute top-4 right-4 z-10">
                     <span className="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
                       Inscrito ✓
                     </span>
                   </div>
-                  
+
                   <CardContent className="p-6 relative z-10">
                     <div className="space-y-4">
                       {/* Ícone e Tag */}
@@ -260,7 +269,7 @@ export function HomeSection() {
                           Tecnologia
                         </div>
                       </div>
-                      
+
                       {/* Título e Descrição */}
                       <div className="space-y-2">
                         <h3 className="font-bold text-xl text-gray-900 group-hover:text-[#5127FF] transition-colors duration-300">
@@ -270,7 +279,7 @@ export function HomeSection() {
                           Venha participar desse programa para startups inovadoras
                         </p>
                       </div>
-                      
+
                       {/* Datas */}
                       <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl group-hover:bg-white group-hover:shadow-sm transition-all duration-300">
                         <div className="flex items-center gap-2 text-sm">
@@ -282,7 +291,7 @@ export function HomeSection() {
                           <span className="font-medium">17/07/2025</span>
                         </div>
                       </div>
-                      
+
                       {/* Status */}
                       <div className="text-center py-2">
                         <span className="text-green-600 font-semibold text-sm bg-green-50 px-4 py-2 rounded-lg">
@@ -296,14 +305,14 @@ export function HomeSection() {
                 {/* Edital 3 - Disponível para Inscrição */}
                 <Card className="group relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 bg-white">
                   <div className="absolute inset-0 bg-gradient-to-br from-[#5127FF]/5 to-[#F4DA02]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  
+
                   {/* Badge de Status */}
                   <div className="absolute top-4 right-4 z-10">
                     <span className="bg-[#F4DA02] text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
                       Aberto
                     </span>
                   </div>
-                  
+
                   <CardContent className="p-6 relative z-10">
                     <div className="space-y-4">
                       {/* Ícone e Tag */}
@@ -315,7 +324,7 @@ export function HomeSection() {
                           Tecnologia
                         </div>
                       </div>
-                      
+
                       {/* Título e Descrição */}
                       <div className="space-y-2">
                         <h3 className="font-bold text-xl text-gray-900 group-hover:text-[#5127FF] transition-colors duration-300">
@@ -325,7 +334,7 @@ export function HomeSection() {
                           Venha participar desse programa exclusivo
                         </p>
                       </div>
-                      
+
                       {/* Datas */}
                       <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl group-hover:bg-white group-hover:shadow-sm transition-all duration-300">
                         <div className="flex items-center gap-2 text-sm">
@@ -337,7 +346,7 @@ export function HomeSection() {
                           <span className="font-medium">17/07/2025</span>
                         </div>
                       </div>
-                      
+
                       {/* Botão de Ação */}
                       <Button
                         className="w-full bg-gradient-to-r from-[#5127FF] to-[#5127FF]/90 hover:from-[#5127FF]/90 hover:to-[#5127FF] text-white font-semibold py-3 rounded-xl transition-all duration-300 transform group-hover:scale-105 shadow-md hover:shadow-lg"
@@ -351,7 +360,7 @@ export function HomeSection() {
                 {/* Edital Exemplo */}
                 <Card className="group relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 bg-white">
                   <div className="absolute inset-0 bg-gradient-to-br from-[#5127FF]/5 to-[#F4DA02]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  
+
                   <CardContent className="p-6 relative z-10">
                     <div className="space-y-4">
                       {/* Ícone e Tag */}
@@ -363,7 +372,7 @@ export function HomeSection() {
                           Exemplo
                         </div>
                       </div>
-                      
+
                       {/* Título e Descrição */}
                       <div className="space-y-2">
                         <h3 className="font-bold text-xl text-gray-900 group-hover:text-[#5127FF] transition-colors duration-300">
@@ -373,7 +382,7 @@ export function HomeSection() {
                           Descrição de exemplo para demonstração
                         </p>
                       </div>
-                      
+
                       {/* Datas */}
                       <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl group-hover:bg-white group-hover:shadow-sm transition-all duration-300">
                         <div className="flex items-center gap-2 text-sm">
@@ -412,7 +421,7 @@ export function HomeSection() {
                   <Card key={mentor.id} className="group relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 bg-white">
                     {/* Gradient Background */}
                     <div className="absolute inset-0 bg-gradient-to-br from-[#5127FF]/5 to-[#F4DA02]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    
+
                     <CardContent className="p-6 relative z-10">
                       {/* Avatar e Info Principal */}
                       <div className="text-center mb-6">

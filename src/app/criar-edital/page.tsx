@@ -2,7 +2,7 @@
 
 
 import { useState } from "react"
-import { Calendar, Tag, FileText, Target, Upload } from "lucide-react"
+import { Calendar, Tag, FileText, Upload } from "lucide-react"
 import { Badge } from "@/presentation/external/components/ui/badge"
 import { Button } from "@/presentation/external/components/ui/button"
 import { Card, CardContent } from "@/presentation/external/components/ui/card"
