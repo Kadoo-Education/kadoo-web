@@ -15,7 +15,7 @@ export class LoginGatewayHttp implements LoginGateway {
     const result = await this.client.post<LoginResponseDTO>('/auth/login', user)
 
     if (result.isLeft()) {
-      throw new Error("Usuário não encontrado.");
+      throw new Error(result?.value?.message);
     }
 
     const { token } = result.value

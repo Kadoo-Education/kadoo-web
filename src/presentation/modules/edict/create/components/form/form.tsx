@@ -6,11 +6,11 @@ import { Input, Label } from "@/presentation/shared/components"
 import { CreateEdictValidation } from "@/validation/protocols/create-edict/edict"
 import { createEdictValidation } from "@/validation/validators/create-edict/create-edict-validation"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Checkbox } from "@radix-ui/react-checkbox"
-import { Separator } from "@radix-ui/react-separator"
+import { Checkbox } from "@/presentation/external/components/ui/checkbox"
+import { Separator } from "@/presentation/external/components/ui/separator"
 import { FileText, Calendar, Upload, Tag, PlusCircle } from "lucide-react"
 import { CldUploadButton } from "next-cloudinary"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Controller, useFieldArray, useForm } from "react-hook-form"
 
 const availableCategories = [
@@ -30,17 +30,53 @@ export function Form() {
 
   const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null)
 
-  const { register, handleSubmit, formState: { errors }, control } = useForm<CreateEdictValidation>({
+  const { register, handleSubmit, formState: { errors }, control, watch } = useForm<CreateEdictValidation>({
     resolver: zodResolver(createEdictValidation),
     defaultValues: {
       categories: [],
+      trails: []
     },
   })
 
-   const { fields: trilhas, append, remove } = useFieldArray({
+  const tracksCount = watch("tracksCount")
+
+  const { fields: trails, append, remove } = useFieldArray({
     control,
-    name: "trilhas"
-  })
+    name: "trails"
+  });
+
+  console.log(errors)
+
+  useEffect(() => {
+    const parsed = parseInt(tracksCount || "", 10);
+
+    // se estiver vazio, nulo, ou for NaN → não faz nada
+    if (!tracksCount || isNaN(parsed) || parsed < 0) return;
+
+    if (parsed > trails.length) {
+      for (let i = trails.length; i < parsed; i++) {
+        append({
+          title: "",
+          type: "",
+          mode: "",
+          date: "",
+          startDate: "",
+          endDate: "",
+          address: "",
+          time: "",
+          link: "",
+          activityTitle: "",
+          activityDescription: "",
+          pdf: null,
+        });
+      }
+    } else if (parsed < trails.length) {
+      for (let i = trails.length; i > parsed; i--) {
+        remove(i - 1);
+      }
+    }
+  }, [tracksCount]);
+
 
   async function handleCreateEdictForm(data: CreateEdictValidation) {
     console.log(data)
@@ -147,20 +183,29 @@ export function Form() {
           <Input.Label className="text-sm font-medium text-gray-700 block">Arquivo PDF do edital
           </Input.Label>
 
-          <CldUploadButton
-            uploadPreset="kadoo-api"
-            signatureEndpoint="/api/cloudinary"
-            options={{ resourceType: "raw" }}
-            onSuccess={(result: any) => {
-              const url = result?.info?.secure_url
-              console.log("Upload concluído:", url)
-              setUploadedFileUrl(url)
-            }}
-            className="inline-flex items-center justify-center gap-2 rounded-md border border-[#5127FF] bg-transparent px-4 py-2 text-sm font-medium text-[#5127FF] transition-colors hover:bg-[#5127FF] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5127FF] focus-visible:ring-offset-2"
-          >
-            <Upload className="w-4 h-4" />
-            Enviar PDF do Edital
-          </CldUploadButton>
+          <Input.Core
+            type="file"
+            accept="application/pdf"
+            {...register('pdf')}
+            className="w-full"
+          />
+
+          {/* <CldUploadButton
+              uploadPreset="kadoo-api"
+              signatureEndpoint="/api/cloudinary"
+              options={{ resourceType: "raw" }}
+              onSuccess={(result: any) => {
+                const url = result?.info?.secure_url
+                console.log("Upload concluído:", url)
+                setUploadedFileUrl(url)
+              }}
+              className="inline-flex items-center justify-center gap-2 rounded-md border border-[#5127FF] bg-transparent px-4 py-2 text-sm font-medium text-[#5127FF] transition-colors hover:bg-[#5127FF] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5127FF] focus-visible:ring-offset-2"
+              
+            >
+              <Upload className="w-4 h-4" />
+              Enviar PDF do Edital
+            </CldUploadButton> */}
+
 
           {uploadedFileUrl && (
             <p className="text-sm text-green-600 mt-1">
@@ -297,46 +342,146 @@ export function Form() {
 
       <Separator />
 
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-[#5127FF]">Trilhas do Edital</h2>
+      <Input.Root>
+        <Input.Label htmlFor="tracksCount" className="text-sm font-medium text-gray-700 mb-2 block">
+          Quantas trilhas você deseja adicionar? *
+        </Input.Label >
+        <Input.Core
+          id="tracksCount"
+          type="number"
+          min={0}
+          placeholder="Informe o número de trilhas"
+          className="h-12 rounded-lg border-gray-200 focus:border-[#5127FF] focus:ring-[#5127FF]"
+          {...register("tracksCount", { valueAsNumber: true })}
+        />
+      </Input.Root>
 
-        {/* Lista de Trilhas */}
-        {trilhas.map((trilha, index) => (
-          <div key={trilha.id} className="mb-6 p-4 border rounded-md shadow-sm bg-white">
-            <div className="mb-3">
-              <Input.Label htmlFor={`trilhas.${index}.name`} className="block mb-1 font-medium text-gray-700">
-                Nome da Trilha
-              </Input.Label>
+      {trails.map((trail, index) => {
+        const tipo = watch(`trails.${index}.type`);
+        const modalidade = watch(`trails.${index}.mode`);
+
+        return (
+          <div key={trail.id} className="mb-6 p-4 border rounded-md shadow-sm bg-white space-y-4">
+            <Input.Root>
+              <Input.Label htmlFor={`trails.${index}.title`}>Título da Trilha *</Input.Label>
               <Input.Core
-                id={`trilhas.${index}.name`}
-                {...register(`categories` as const, { required: true })}
-                placeholder="Nome da trilha"
+                id={`trails.${index}.title`}
+                {...register(`trails.${index}.title`)}
                 className="w-full"
+                placeholder="Digite o título da trilha"
               />
+            </Input.Root>
+            <div>
+              <Input.Label htmlFor={`trails.${index}.type`}>Tipo da Trilha</Input.Label>
+              <select
+                id={`trails.${index}.type`}
+                {...register(`trails.${index}.type`)}
+                className="w-full border rounded px-3 py-2 mt-1"
+              >
+                <option value="">Selecione</option>
+                <option value="evento">Evento</option>
+                <option value="atividade">Atividade</option>
+              </select>
             </div>
 
-            <div className="mb-3">
-              <Input.Label htmlFor={`trilhas.${index}.type`} className="block mb-1 font-medium text-gray-700">
-                Tipo da Trilha
-              </Input.Label>
-              <Input.Core
-                id={`trilhas.${index}.type`}
-                {...register(`trilhas.${index}.type` as const, { required: true })}
-                placeholder="Tipo da trilha"
-                className="w-full"
-              />
-            </div>
+            {tipo === "evento" && (
+              <>
+                <Input.Root>
+                  <Input.Label htmlFor={`trails.${index}.date`}>Data do Evento *</Input.Label>
+                  <Input.Core
+                    type="date"
+                    id={`trails.${index}.date`}
+                    {...register(`trails.${index}.date`)}
+                    className="w-full"
+                  />
+                </Input.Root>
 
-            {/* Aqui poderia ficar upload do PDF e atividades */}
+                <div>
+                  <Input.Label htmlFor={`trails.${index}.mode`}>Modalidade do Evento</Input.Label>
+                  <select
+                    id={`trails.${index}.mode`}
+                    {...register(`trails.${index}.mode`)}
+                    className="w-full border rounded px-3 py-2 mt-1"
+                  >
+                    <option value="">Selecione</option>
+                    <option value="presencial">Presencial</option>
+                    <option value="online">Online</option>
+                  </select>
+                </div>
 
+                {modalidade === "presencial" && (
+                  <>
+                    <Input.Root>
+                      <Input.Label htmlFor={`trails.${index}.address`}>Endereço</Input.Label>
+                      <Input.Core
+                        id={`trails.${index}.address`}
+                        {...register(`trails.${index}.address`)}
+                        className="w-full"
+                      />
+                    </Input.Root>
+
+                    <Input.Root>
+                      <Input.Label htmlFor={`trails.${index}.time`}>Horário</Input.Label>
+                      <Input.Core
+                        id={`trails.${index}.time`}
+                        type="time"
+                        {...register(`trails.${index}.time`)}
+                        className="w-full"
+                      />
+                    </Input.Root>
+                  </>
+                )}
+
+                {modalidade === "online" && (
+                  <Input.Root>
+                    <Input.Label htmlFor={`trails.${index}.link`}>Link do Meet</Input.Label>
+                    <Input.Core
+                      id={`trails.${index}.link`}
+                      {...register(`trails.${index}.link`)}
+                      className="w-full"
+                    />
+                  </Input.Root>
+                )}
+              </>
+            )}
+
+
+            {tipo === "atividade" && (
+              <>
+                <Input.Root>
+                  <Input.Label htmlFor={`trails.${index}.activityTitle`}>Título da Atividade</Input.Label>
+                  <Input.Core
+                    id={`trails.${index}.activityTitle`}
+                    {...register(`trails.${index}.activityTitle`)}
+                    className="w-full"
+                  />
+                </Input.Root>
+
+                <Input.Root>
+                  <Input.Label htmlFor={`trails.${index}.activityDescription`}>Descrição</Input.Label>
+                  <Textarea
+                    id={`trails.${index}.activityDescription`}
+                    {...register(`trails.${index}.activityDescription`)}
+                    className="w-full"
+                  />
+                </Input.Root>
+
+                <Input.Root>
+                  <Input.Label>PDF da Atividade</Input.Label>
+                  <Input.Core
+                    type="file"
+                    accept="application/pdf"
+                    {...register(`trails.${index}.pdf`)}
+                    className="w-full"
+                  />
+                </Input.Root>
+              </>
+            )}
           </div>
-        ))}
+        );
+      })}
 
-        <Button type="button" className="mt-4 bg-[#F4DA02] text-black hover:bg-[#F4DA02]/90 font-semibold px-6 py-2 rounded-md">
-          <PlusCircle className="w-4 h-4 mr-2" />
-          Adicionar nova trilha
-        </Button>
-      </div>
+
 
       {/* <div className="space-y-6">
                 <div className="flex items-center gap-2 mb-4">
