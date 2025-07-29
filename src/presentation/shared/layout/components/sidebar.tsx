@@ -27,14 +27,14 @@ export function HomeSideBar({ role }: HomeSideBarProps) {
 
   const allMenuItems = [
     { title: "Home", icon: Home, url: APP_ROUTES.home },
-    { title: "Editais", icon: FileText, url: APP_ROUTES.create_edict, onlyEnterprise: true },
+    { title: "Editais", icon: FileText, url: APP_ROUTES.create_edict, onAdmin: true },
     { title: "Mentores", icon: UsersIcon, url: "#" },
     { title: "Meu progresso", icon: BarChart3, url: "#" },
   ]
 
   const menuItems = allMenuItems.filter(item => {
-    if (!item.onlyEnterprise) return true
-    return role === EnumProfile.ROLE_ENTERPRISE || role === EnumProfile.ROLE_ADMIN
+    if (!item.onAdmin) return true
+    return role === EnumProfile.ROLE_ADMIN
   })
 
   async function handleLogOut() {

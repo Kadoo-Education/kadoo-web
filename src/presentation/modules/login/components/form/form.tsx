@@ -10,6 +10,7 @@ import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { APP_ROUTES } from "@/shared/constants/routes";
+import { toast } from "sonner";
 
 export function Form() {
   const { push } = useRouter()
@@ -28,10 +29,13 @@ export function Form() {
 
     try {
       await loginGatewayHttp.login(data);
-      alert("Login realizado com sucesso!");
+      toast.success("Login realizado com sucesso!");
       push(APP_ROUTES.home);
     } catch (error) {
-      console.error("Erro ao fazer login:", error);
+      if (error instanceof Error) {
+        console.log(error)
+        toast.error(error?.message)
+      }
     } finally {
       setIsLoading(false);
     }
