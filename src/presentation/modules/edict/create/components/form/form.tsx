@@ -12,6 +12,8 @@ import { FileText, Calendar, Upload, Tag, PlusCircle } from "lucide-react"
 import { CldUploadButton } from "next-cloudinary"
 import { useEffect, useState } from "react"
 import { Controller, useFieldArray, useForm } from "react-hook-form"
+import { edictGatewayHttp } from "@/infra/modules/edict/edict-gateway-http"
+import { toast } from "sonner"
 
 const availableCategories = [
   "Tecnologia",
@@ -45,12 +47,9 @@ export function Form() {
     name: "trails"
   });
 
-  console.log(errors)
-
   useEffect(() => {
     const parsed = parseInt(tracksCount || "", 10);
 
-    // se estiver vazio, nulo, ou for NaN → não faz nada
     if (!tracksCount || isNaN(parsed) || parsed < 0) return;
 
     if (parsed > trails.length) {
@@ -79,22 +78,31 @@ export function Form() {
 
 
   async function handleCreateEdictForm(data: CreateEdictValidation) {
-    console.log(data)
+    const formData = new FormData()
+    formData.append("file", data.pdf)
+
+    fetch("/api/cloudinary", {
+      method: "POST",
+      headers: {
+        'Content-Type': "multipart/form-data"
+      },
+      body: formData
+    })
 
     // edictGatewayHttp.create({
-    //   description: formData.shortDescription,
-    //   title: formData.title,
-    //   startDate: new Date(formData.startDate),
-    //   endDate: new Date(formData.endDate),
-    //   tag: formData.selectedCategories,
+    //   description: data.description,
+    //   title: data.title,
+    //   startDate: new Date(data.startDate),
+    //   endDate: new Date(data.endDate),
+    //   tag: data.categories,
+
     // })
 
-    // toast.success("Dados enviados! Veja o console.")
+    toast.success("Dados enviados! Veja o console.")
   }
 
-
   return (
-    <form className="space-y-8" onSubmit={handleSubmit(handleCreateEdictForm)}>
+    <form className="space-y-8" onSubmit={handleSubmit(handleCreateEdictForm)} encType="multipart/form-data">
       <div className="space-y-6">
         <div className="flex items-center gap-2 mb-4">
           <FileText className="w-5 h-5 text-[#5127FF]" />
