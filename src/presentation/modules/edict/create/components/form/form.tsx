@@ -14,6 +14,10 @@ import { useEffect, useState } from "react"
 import { Controller, useFieldArray, useForm } from "react-hook-form"
 import { edictGatewayHttp } from "@/infra/modules/edict/edict-gateway-http"
 import { toast } from "sonner"
+import remarkGfm from "remark-gfm"
+
+import ReactMarkdown from 'react-markdown'
+
 
 const availableCategories = [
   "Tecnologia",
@@ -30,7 +34,11 @@ const availableCategories = [
 
 export function Form() {
 
-  const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null)
+  const [edictFile, setEdictFile] = useState<File>();
+  const [activityFile, setActivityFile] = useState<File>()
+  const [url, setUrl] = useState("");
+
+  const [descricao, setDescricao] = useState("")
 
   const { register, handleSubmit, formState: { errors }, control, watch } = useForm<CreateEdictValidation>({
     resolver: zodResolver(createEdictValidation),
@@ -78,16 +86,20 @@ export function Form() {
 
 
   async function handleCreateEdictForm(data: CreateEdictValidation) {
-    const formData = new FormData()
-    formData.append("file", data.pdf)
 
-    fetch("/api/cloudinary", {
-      method: "POST",
-      headers: {
-        'Content-Type': "multipart/form-data"
-      },
-      body: formData
-    })
+    if (!edictFile) return
+
+    const formData = new FormData()
+    formData.set("file", edictFile)
+
+    console.log(data, activityFile)
+
+    // const uploadRequest = await fetch("/api/upload-file", {
+    //   method: "POST",
+    //   body: formData
+    // })
+
+    // const signedUrl = await uploadRequest.json();
 
     // edictGatewayHttp.create({
     //   description: data.description,
@@ -100,6 +112,8 @@ export function Form() {
 
     toast.success("Dados enviados! Veja o console.")
   }
+
+  const markdown = `Just a link: https://reactjs.com.`
 
   return (
     <form className="space-y-8" onSubmit={handleSubmit(handleCreateEdictForm)} encType="multipart/form-data">
@@ -122,7 +136,7 @@ export function Form() {
             />
           </Input.Root>
 
-          <Input.Root>
+          {/* <Input.Root>
             <Input.Label htmlFor="shortDescription" className="text-sm font-medium text-gray-700 mb-2 block">
               Descrição Curta *<span className="text-gray-500 font-normal ml-1">(máx. 300 caracteres)</span>
             </Input.Label>
@@ -133,10 +147,10 @@ export function Form() {
               maxLength={300}
               className="min-h-[100px] rounded-lg border-gray-200 focus:border-[#5127FF] focus:ring-[#5127FF] resize-none"
               {...register("description")}
-            />
-            {/* <div className="text-right text-sm text-gray-500 mt-1">{formData.shortDescription.length}/300
+            /> */}
+          {/* <div className="text-right text-sm text-gray-500 mt-1">{formData.shortDescription.length}/300
             </div> */}
-          </Input.Root>
+          {/* </Input.Root> */}
 
           {/* <div>
                     <Label htmlFor="fullDescription" className="text-sm font-medium text-gray-700 mb-2 block">
@@ -150,10 +164,35 @@ export function Form() {
                       className="min-h-[200px] rounded-lg border-gray-200 focus:border-[#5127FF] focus:ring-[#5127FF] resize-none"
                     />
                   </div> */}
+
+          <Input.Root>
+            <Label>Descrição do Edital</Label>
+
+            <Textarea
+              id="descricao"
+              placeholder="Digite a descrição do edital aqui usando markdown..."
+              rows={15}
+              className="resize-none"
+              value={descricao}
+              onChange={(e) => setDescricao(e.target.value)}
+            />
+          </Input.Root>
+
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              h1: (props) => <h1 className="text-4xl font-extrabold" {...props} />
+            }}
+          >
+            {descricao}
+          </ReactMarkdown>
+
         </div>
+
+
       </div>
 
-      <Separator />
+      <Separator className="bg-gray-300" />
 
       <div className="space-y-6">
         <div className="flex items-center gap-2 mb-4">
@@ -194,32 +233,17 @@ export function Form() {
           <Input.Core
             type="file"
             accept="application/pdf"
-            {...register('pdf')}
             className="w-full"
+            onChange={(e) => setEdictFile(e?.target?.files?.[0])}
           />
 
-          {/* <CldUploadButton
-              uploadPreset="kadoo-api"
-              signatureEndpoint="/api/cloudinary"
-              options={{ resourceType: "raw" }}
-              onSuccess={(result: any) => {
-                const url = result?.info?.secure_url
-                console.log("Upload concluído:", url)
-                setUploadedFileUrl(url)
-              }}
-              className="inline-flex items-center justify-center gap-2 rounded-md border border-[#5127FF] bg-transparent px-4 py-2 text-sm font-medium text-[#5127FF] transition-colors hover:bg-[#5127FF] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5127FF] focus-visible:ring-offset-2"
-              
-            >
-              <Upload className="w-4 h-4" />
-              Enviar PDF do Edital
-            </CldUploadButton> */}
 
 
-          {uploadedFileUrl && (
+          {/* {edictFile && (
             <p className="text-sm text-green-600 mt-1">
-              Arquivo enviado com sucesso! <a href={uploadedFileUrl} className="underline" target="_blank">Ver PDF</a>
+              Arquivo enviado com sucesso! <a href={edictFile} className="underline" target="_blank">Ver PDF</a>
             </p>
-          )}
+          )} */}
         </Input.Root>
       </div>
 
@@ -479,8 +503,8 @@ export function Form() {
                   <Input.Core
                     type="file"
                     accept="application/pdf"
-                    {...register(`trails.${index}.pdf`)}
                     className="w-full"
+                    onChange={(e) => setActivityFile(e?.target?.files?.[0])}
                   />
                 </Input.Root>
               </>
