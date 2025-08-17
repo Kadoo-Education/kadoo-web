@@ -11,7 +11,6 @@ const trailSchema = z.object({
   link: z.string().optional(),
   activityTitle: z.string().optional(),
   activityDescription: z.string().optional(),
-  // pdf: z.any().optional(),
 })
 
 export const createEdictValidation = z.object({
@@ -20,7 +19,6 @@ export const createEdictValidation = z.object({
   startDate: z.string().min(1, "Data de início é obrigatória"),
   endDate: z.string().min(1, "Data de término é obrigatória"),
   categories: z.array(z.string()).nonempty("Pelo menos uma categoria deve ser selecionada"),
-  // pdf: z.any().optional(),
   tracksCount: z
     .number()
     .int("Deve ser um número inteiro")

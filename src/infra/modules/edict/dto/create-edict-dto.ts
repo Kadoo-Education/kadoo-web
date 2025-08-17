@@ -3,5 +3,17 @@ export interface CreateEdictDTO {
   description: string
   startDate: Date
   endDate: Date
-  tag: string[]
+  linkDoc: string
+  tags: string[]
+  trails: {
+    title: string
+    type: string
+    date?: string
+    mode?: string
+    address?: string
+    time?: string
+    link?: string
+    activityTitle?: string
+    activityDescription?: string
+  }[]
 }

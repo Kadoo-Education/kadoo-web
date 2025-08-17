@@ -7,8 +7,6 @@ import { APP_ROUTES } from "@/shared/constants/routes"
 import { Form } from "../form/form"
 
 export function CreateEdictSection() {
-
-
   return (
     <div className="bg-gray-50 min-h-screen">
       <header className="bg-white border-b shadow-sm">

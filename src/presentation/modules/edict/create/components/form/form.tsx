@@ -8,8 +8,7 @@ import { createEdictValidation } from "@/validation/validators/create-edict/crea
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Checkbox } from "@/presentation/external/components/ui/checkbox"
 import { Separator } from "@/presentation/external/components/ui/separator"
-import { FileText, Calendar, Upload, Tag, PlusCircle } from "lucide-react"
-import { CldUploadButton } from "next-cloudinary"
+import { FileText, Calendar, Tag } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Controller, useFieldArray, useForm } from "react-hook-form"
 import { edictGatewayHttp } from "@/infra/modules/edict/edict-gateway-http"
@@ -17,6 +16,8 @@ import { toast } from "sonner"
 import remarkGfm from "remark-gfm"
 
 import ReactMarkdown from 'react-markdown'
+import { ScrollArea } from "@/presentation/external/components/ui/scroll-area"
+import clsx from "clsx"
 
 
 const availableCategories = [
@@ -36,11 +37,11 @@ export function Form() {
 
   const [edictFile, setEdictFile] = useState<File>();
   const [activityFile, setActivityFile] = useState<File>()
-  const [url, setUrl] = useState("");
 
-  const [descricao, setDescricao] = useState("")
 
-  const { register, handleSubmit, formState: { errors }, control, watch } = useForm<CreateEdictValidation>({
+  const [previewMode, setPreviewMode] = useState(false)
+
+  const { register, handleSubmit, control, watch, formState: { errors } } = useForm<CreateEdictValidation>({
     resolver: zodResolver(createEdictValidation),
     defaultValues: {
       categories: [],
@@ -84,36 +85,71 @@ export function Form() {
     }
   }, [tracksCount]);
 
+  async function uploadFile(file: File) {
+    const formData = new FormData();
+    formData.set("file", file);
 
-  async function handleCreateEdictForm(data: CreateEdictValidation) {
+    const response = await fetch(`/api/upload-file`, {
+      method: "POST",
+      body: formData,
+    });
 
-    if (!edictFile) return
+    if (!response.ok) {
+      throw new Error(`Erro ao enviar`);
+    }
 
-    const formData = new FormData()
-    formData.set("file", edictFile)
-
-    console.log(data, activityFile)
-
-    // const uploadRequest = await fetch("/api/upload-file", {
-    //   method: "POST",
-    //   body: formData
-    // })
-
-    // const signedUrl = await uploadRequest.json();
-
-    // edictGatewayHttp.create({
-    //   description: data.description,
-    //   title: data.title,
-    //   startDate: new Date(data.startDate),
-    //   endDate: new Date(data.endDate),
-    //   tag: data.categories,
-
-    // })
-
-    toast.success("Dados enviados! Veja o console.")
+    const data = await response.json();
+    console.log(data)
+    return data;
   }
 
-  const markdown = `Just a link: https://reactjs.com.`
+
+  async function handleCreateEdictForm(data: CreateEdictValidation) {
+    if (!edictFile) {
+      toast.error("Você precisa enviar o arquivo do edital");
+      return;
+    }
+
+    try {
+      const edictUrl = await uploadFile(edictFile);
+      if (!edictUrl) {
+        toast.error("Erro ao fazer upload do arquivo do edital.");
+        return;
+      }
+
+      let activityUrl: string | null = null;
+      if (activityFile) {
+        activityUrl = await uploadFile(activityFile);
+        if (!activityUrl) {
+          toast.error("Erro ao fazer upload do arquivo da atividade.");
+          return;
+        }
+      }
+
+      await edictGatewayHttp.create({
+        title: data.title,
+        description: data.description,
+        startDate: new Date(data.startDate),
+        endDate: new Date(data.endDate),
+        tags: data.categories,
+        linkDoc: edictUrl,
+        trails: data.trails.map((trail) => {
+          if (trail.type === "atividade") {
+            return { ...trail, activityUrl };
+          }
+          return trail;
+        }),
+      });
+
+      toast.success("Edital publicado com sucesso!");
+    } catch (err) {
+      toast.error("Erro ao publicar edital. Verifique os arquivos.");
+      console.error(err);
+    }
+  }
+
+  const descriptionWatched = watch("description")
+
 
   return (
     <form className="space-y-8" onSubmit={handleSubmit(handleCreateEdictForm)} encType="multipart/form-data">
@@ -136,56 +172,75 @@ export function Form() {
             />
           </Input.Root>
 
-          {/* <Input.Root>
-            <Input.Label htmlFor="shortDescription" className="text-sm font-medium text-gray-700 mb-2 block">
-              Descrição Curta *<span className="text-gray-500 font-normal ml-1">(máx. 300 caracteres)</span>
-            </Input.Label>
-            <Textarea
-              id="shortDescription"
-              placeholder="Uma breve descrição que aparecerá nos cards de listagem..."
-
-              maxLength={300}
-              className="min-h-[100px] rounded-lg border-gray-200 focus:border-[#5127FF] focus:ring-[#5127FF] resize-none"
-              {...register("description")}
-            /> */}
-          {/* <div className="text-right text-sm text-gray-500 mt-1">{formData.shortDescription.length}/300
-            </div> */}
-          {/* </Input.Root> */}
-
-          {/* <div>
-                    <Label htmlFor="fullDescription" className="text-sm font-medium text-gray-700 mb-2 block">
-                      Descrição Completa *
-                    </Label>
-                    <Textarea
-                      id="fullDescription"
-                      placeholder="Descreva detalhadamente o programa, objetivos, metodologia, benefícios..."
-                      value={formData.fullDescription}
-                      onChange={(e) => handleInputChange("fullDescription", e.target.value)}
-                      className="min-h-[200px] rounded-lg border-gray-200 focus:border-[#5127FF] focus:ring-[#5127FF] resize-none"
-                    />
-                  </div> */}
-
           <Input.Root>
-            <Label>Descrição do Edital</Label>
+            <Label htmlFor="description" className="text-sm font-medium text-gray-700 mb-1 block">
+              Descrição do Edital *
+            </Label>
 
-            <Textarea
-              id="descricao"
-              placeholder="Digite a descrição do edital aqui usando markdown..."
-              rows={15}
-              className="resize-none"
-              value={descricao}
-              onChange={(e) => setDescricao(e.target.value)}
-            />
+            <div className="flex items-center gap-4 mb-2 text-sm">
+
+              <span
+                role="button"
+                onClick={() => setPreviewMode(false)}
+                className={clsx(
+                  "cursor-pointer transition-all",
+                  !previewMode ? "text-[#5127FF] font-semibold" : "text-gray-400"
+                )}
+              >
+                Editar
+              </span>
+
+              <span className="text-gray-300">|</span>
+
+              <span
+                role="button"
+                onClick={() => setPreviewMode(true)}
+                className={clsx(
+                  "cursor-pointer transition-all",
+                  previewMode ? "text-[#5127FF] font-semibold" : "text-gray-400"
+                )}
+              >
+                Preview
+              </span>
+
+            </div>
+
+            {!previewMode ? (
+              <Textarea
+                id="description"
+                placeholder="Digite a descrição do edital aqui usando markdown..."
+                rows={12}
+                className="resize-none rounded-md border border-gray-300 focus:border-[#5127FF]"
+                {...register("description")}
+              />
+            ) : (
+              <ScrollArea className="h-[300px] rounded-md border border-gray-300 p-4 bg-gray-50">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    h1: (props) => <h1 className="text-2xl font-bold" {...props} />,
+                    h2: (props) => <h2 className="text-xl font-semibold" {...props} />,
+                    p: (props) => <p className="leading-relaxed" {...props} />,
+                  }}
+                >
+                  {descriptionWatched || "_Sem conteúdo para pré-visualizar._"}
+                </ReactMarkdown>
+              </ScrollArea>
+            )}
           </Input.Root>
 
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            components={{
-              h1: (props) => <h1 className="text-4xl font-extrabold" {...props} />
-            }}
-          >
-            {descricao}
-          </ReactMarkdown>
+          <Input.Root>
+            <Label htmlFor="organizer" className="text-sm font-medium text-gray-700 mb-1 block">
+              Organizador do Edital
+            </Label>
+            <Input.Core
+              id="organizer"
+              placeholder="Escreva quem irá organizar o Edital"
+              className="h-12 rounded-lg border-gray-200 focus:border-[#5127FF] focus:ring-[#5127FF]"
+            />
+
+
+          </Input.Root>
 
         </div>
 
@@ -236,102 +291,11 @@ export function Form() {
             className="w-full"
             onChange={(e) => setEdictFile(e?.target?.files?.[0])}
           />
-
-
-
-          {/* {edictFile && (
-            <p className="text-sm text-green-600 mt-1">
-              Arquivo enviado com sucesso! <a href={edictFile} className="underline" target="_blank">Ver PDF</a>
-            </p>
-          )} */}
         </Input.Root>
       </div>
 
       <Separator />
 
-      {/* <div className="space-y-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Target className="w-5 h-5 text-[#5127FF]" />
-                  <h2 className="text-xl font-semibold text-gray-900">Requisitos</h2>
-                </div>
-
-                <div>
-                  <Label htmlFor="eligibilityRequirements" className="text-sm font-medium text-gray-700 mb-2 block">
-                    Requisitos de Elegibilidade *
-                  </Label>
-                  <Textarea
-                    id="eligibilityRequirements"
-                    placeholder="Liste os requisitos necessários para participar do programa..."
-                    value={formData.eligibilityRequirements}
-                    onChange={(e) => handleInputChange("eligibilityRequirements", e.target.value)}
-                    className="min-h-[120px] rounded-lg border-gray-200 focus:border-[#5127FF] focus:ring-[#5127FF] resize-none"
-                  />
-                </div>
-              </div> */}
-
-      {/* <Separator /> */}
-
-      {/* <div className="space-y-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <ImageIcon className="w-5 h-5 text-[#5127FF]" />
-                  <h2 className="text-xl font-semibold text-gray-900">Imagem do Programa</h2>
-                </div>
-
-                <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">Banner do Programa</Label>
-                  <div
-                    className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${dragActive ? "border-[#5127FF] bg-[#5127FF]/5" : "border-gray-300 hover:border-[#5127FF]"
-                      }`}
-                    onDragEnter={handleDrag}
-                    onDragLeave={handleDrag}
-                    onDragOver={handleDrag}
-                    onDrop={handleDrop}
-                  >
-                    {formData.bannerImage ? (
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-center gap-2">
-                          <Upload className="w-5 h-5 text-green-600" />
-                          <span className="text-green-600 font-medium">{formData.bannerImage.name}</span>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleInputChange("bannerImage", null)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        <Upload className="w-12 h-12 text-gray-400 mx-auto" />
-                        <div>
-                          <p className="text-gray-600">Arraste e solte uma imagem aqui, ou</p>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="mt-2 border-[#5127FF] text-[#5127FF] hover:bg-[#5127FF] hover:text-white"
-                            onClick={() => document.getElementById("bannerUpload")?.click()}
-                          >
-                            Selecionar Arquivo
-                          </Button>
-                        </div>
-                        <p className="text-sm text-gray-500">PNG, JPG até 5MB</p>
-                      </div>
-                    )}
-                    <input
-                      id="bannerUpload"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
-                    />
-                  </div>
-                </div>
-              </div> */}
-
-      <Separator />
 
       <div className="space-y-6">
         <div className="flex items-center gap-2 mb-4">
@@ -361,7 +325,7 @@ export function Form() {
                       id={`category-${category}`}
                       checked={isChecked}
                       onCheckedChange={toggleCategory}
-                      className="data-[state=checked]:bg-[#5127FF] data-[state=checked]:border-[#5127FF]"
+                      className="data-[state=checked]:bg-[#5127FF] data-[state=checked]:border-[#5127FF] data-[state=checked]:text-white"
                     />
                     <Label htmlFor={`category-${category}`}>{category}</Label>
                   </div>
@@ -376,13 +340,13 @@ export function Form() {
 
       <Input.Root>
         <Input.Label htmlFor="tracksCount" className="text-sm font-medium text-gray-700 mb-2 block">
-          Quantas trilhas você deseja adicionar? *
+          Quantas etapas você deseja adicionar? *
         </Input.Label >
         <Input.Core
           id="tracksCount"
           type="number"
           min={0}
-          placeholder="Informe o número de trilhas"
+          placeholder="Informe o número de etapas"
           className="h-12 rounded-lg border-gray-200 focus:border-[#5127FF] focus:ring-[#5127FF]"
           {...register("tracksCount", { valueAsNumber: true })}
         />
@@ -395,16 +359,16 @@ export function Form() {
         return (
           <div key={trail.id} className="mb-6 p-4 border rounded-md shadow-sm bg-white space-y-4">
             <Input.Root>
-              <Input.Label htmlFor={`trails.${index}.title`}>Título da Trilha *</Input.Label>
+              <Input.Label htmlFor={`trails.${index}.title`}>Título da Etapa *</Input.Label>
               <Input.Core
                 id={`trails.${index}.title`}
                 {...register(`trails.${index}.title`)}
                 className="w-full"
-                placeholder="Digite o título da trilha"
+                placeholder="Digite o título da etapa"
               />
             </Input.Root>
             <div>
-              <Input.Label htmlFor={`trails.${index}.type`}>Tipo da Trilha</Input.Label>
+              <Input.Label htmlFor={`trails.${index}.type`}>Tipo da Etapa</Input.Label>
               <select
                 id={`trails.${index}.type`}
                 {...register(`trails.${index}.type`)}
@@ -512,53 +476,6 @@ export function Form() {
           </div>
         );
       })}
-
-
-
-      {/* <div className="space-y-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Users className="w-5 h-5 text-[#5127FF]" />
-                  <h2 className="text-xl font-semibold text-gray-900">Mentores Envolvidos</h2>
-                </div>
-
-                <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-3 block">
-                    Selecione os mentores que participarão do programa
-                  </Label>
-                  <div className="space-y-3">
-                    {availableMentors.map((mentor) => (
-                      <div
-                        key={mentor.id}
-                        className={`flex items-center space-x-3 p-3 rounded-lg border transition-colors cursor-pointer ${formData.selectedMentors.includes(mentor.id)
-                            ? "border-[#5127FF] bg-[#5127FF]/5"
-                            : "border-gray-200 hover:border-[#5127FF]/50"
-                          }`}
-                        onClick={() => handleMentorToggle(mentor.id)}
-                      >
-                        <Checkbox
-                          checked={formData.selectedMentors.includes(mentor.id)}
-                          onCheckedChange={() => handleMentorToggle(mentor.id)}
-                          className="data-[state=checked]:bg-[#5127FF] data-[state=checked]:border-[#5127FF]"
-                        />
-                        <Avatar className="w-10 h-10">
-                          <AvatarImage src={mentor.avatar || "/placeholder.svg"} />
-                          <AvatarFallback className="bg-[#5127FF] text-white">
-                            {mentor.name
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <p className="font-medium text-gray-900">{mentor.name}</p>
-                          <p className="text-sm text-gray-600">{mentor.area}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div> */}
-
       <div className="flex flex-col sm:flex-row gap-4 pt-6">
         <Button
           type="submit"

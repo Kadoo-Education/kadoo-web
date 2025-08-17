@@ -9,9 +9,9 @@ export class EdictGatewayHttp implements EdictGateway {
 
 
   async create(edict: CreateEdictDTO): Promise<void> {
+    console.log(edict)
     await this.client.post('/edict', {
-      linkDoc: "exemplo",
-      category: "Tecnologia",
+      category: ["Tecnologia"],
       ...edict
     });
   }
