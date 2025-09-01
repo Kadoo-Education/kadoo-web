@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState } from "react";
 import { userGatewayHttp } from "@/infra/modules/user/user-gateway-http";
 import { EnumProfile, Profile } from "@/presentation/shared/layout/components/profile/profile";
 import { Loading } from "@/presentation/shared/layout/components/loading/loading";
-import { Card, CardContent, CardHeader, CardTitle } from "@/presentation/external/components/ui/card";
+import { Card, CardContent } from "@/presentation/external/components/ui/card";
 import { Input } from "@/presentation/external/components/ui/input";
 import { Footer } from "@/presentation/external/components/ui/footer";
 
@@ -204,7 +204,6 @@ export default function EditaisPage() {
 
   if (!user) return <Loading />;
 
-  const firstName = user?.name.split(" ")[0];
   const role = user.role;
 
   return (
@@ -215,7 +214,6 @@ export default function EditaisPage() {
           <Header profile={<Profile {...user} />}/>
 
           <main className="p-6 space-y-8">
-            {/* Hero Section */}
             <Card className="bg-gradient-to-r from-[#5127FF] to-[#5127FF]/80 text-white border-0 shadow-xl">
               <CardContent className="p-8">
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
@@ -237,7 +235,6 @@ export default function EditaisPage() {
               </CardContent>
             </Card>
 
-            {/* Search and Filters */}
             <Card className="border-0 shadow-md">
               <CardContent className="p-6">
                 <div className="space-y-4">

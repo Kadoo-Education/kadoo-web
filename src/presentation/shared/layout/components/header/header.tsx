@@ -9,7 +9,7 @@ interface HeaderProps {
 
 export function Header({ profile }: HeaderProps) {
   return (
-    <header className="flex items-center justify-between p-6 bg-white border-b">
+    <header className="flex items-center justify-between p-6 bg-white border-b border-[#000]/10">
       <div className="flex items-center gap-4">
         <SidebarTrigger />
         <div>

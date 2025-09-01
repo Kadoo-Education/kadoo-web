@@ -1,23 +1,21 @@
 import { client, HttpClient } from "@/infra/external/http";
 import { EdictGateway } from "./edict-gateway";
 import { CreateEdictDTO } from "./dto/create-edict-dto";
-import { GetAllEdictDTO } from "./dto/get-all-edict-dto";
+import { EdictDTO } from "./dto/edict-dto";
 
 export class EdictGatewayHttp implements EdictGateway {
 
   constructor(private readonly client: HttpClient) { }
-
+  
 
   async create(edict: CreateEdictDTO): Promise<void> {
-    console.log(edict)
     await this.client.post('/edict', {
-      category: ["Tecnologia"],
       ...edict
     });
   }
 
-  async getAll(): Promise<GetAllEdictDTO[]> {
-    const response = await this.client.get<GetAllEdictDTO[]>('/edict');
+  async getAll(): Promise<EdictDTO[]> {
+    const response = await this.client.get<EdictDTO[]>('/edict');
 
     if (response.isLeft()) {
       throw new Error("Erro ao buscar editais.");
@@ -32,6 +30,15 @@ export class EdictGatewayHttp implements EdictGateway {
     });
   }
 
+  async getById(id: number): Promise<EdictDTO> {
+    const response = await this.client.get<EdictDTO>(`/edict/${id}`)
+
+    if(response.isLeft()) {
+      throw new Error("Edital não encontrado.")
+    }
+
+    return response.value
+  }
 }
 
 export const edictGatewayHttp = new EdictGatewayHttp(client);

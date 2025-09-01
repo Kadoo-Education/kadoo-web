@@ -116,10 +116,9 @@ export default function TrilhaPage({ params }: { params: { id: string } }) {
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-10 space-y-8">
-      {/* Voltar */}
       <div className="flex items-center justify-between">
         <Link
-          href="/trilhas"
+          href="/etapas-do-edital/1"
           className="inline-flex items-center gap-2 text-sm font-medium text-[#5127FF] hover:underline"
         >
           <ArrowLeft className="w-4 h-4" />

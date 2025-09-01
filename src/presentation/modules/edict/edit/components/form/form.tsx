@@ -3,15 +3,10 @@
 import { Button } from "@/presentation/external/components/ui/button"
 import { Textarea } from "@/presentation/external/components/ui/textarea"
 import { Input, Label } from "@/presentation/shared/components"
-import { CreateEdictValidation } from "@/validation/protocols/create-edict/edict"
-import { createEdictValidation } from "@/validation/validators/create-edict/create-edict-validation"
-import { zodResolver } from "@hookform/resolvers/zod"
 import { Checkbox } from "@/presentation/external/components/ui/checkbox"
 import { Separator } from "@/presentation/external/components/ui/separator"
 import { FileText, Calendar, Tag, Footprints, PlusCircleIcon, Trash2, Loader2 } from "lucide-react"
-import { useState } from "react"
 import { Controller, useFieldArray, useForm } from "react-hook-form"
-import { toast } from "sonner"
 import remarkGfm from "remark-gfm"
 
 import { Calendar as CalendarShad } from '@/presentation/external/components/ui/calendar'
@@ -24,7 +19,10 @@ import { format } from "date-fns"
 import { cn } from "@/presentation/external/lib/utils"
 import { ptBR } from "date-fns/locale"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/external/components/ui/select"
-import { edictGatewayHttp } from "@/infra/modules/edict/edict-gateway-http"
+import z from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useState } from "react"
+import { EdictDTO } from "@/infra/modules/edict/dto/edict-dto"
 
 const availableCategories = [
   "Tecnologia",
@@ -39,13 +37,71 @@ const availableCategories = [
   "Mobilidade",
 ]
 
-export function Form() {
+const schemaBaseTrails = z.object({
+  type: z.literal("Evento"),
+  title: z.string(),
+  description: z.string(),
+  time: z.string(),
+  date: z.date(),
+})
+
+const schemaPresencialTrail = schemaBaseTrails.extend({
+  format: z.literal("Presencial"),
+  address: z.string().optional(),
+})
+
+const schemaOnlineTrail = schemaBaseTrails.extend({
+  format: z.literal("Online"),
+  meetingLink: z.string().optional(),
+})
+
+const eventSchema = z.discriminatedUnion("format", [schemaPresencialTrail, schemaOnlineTrail])
+
+const schemaActivity = z.object({
+  type: z.literal("Atividade").optional(),
+  activityTitle: z.string(),
+  file: z.instanceof(FileList),
+  dueDate: z.date().optional(),
+})
+
+const stepSchema = z.discriminatedUnion("type", [eventSchema, schemaActivity])
+
+
+const schema = z.object({
+  title: z.string().min(1, "Título é obrigatório."),
+  description: z.string().min(1, "Descrição é obrigatória."),
+  organizer: z.string().min(1, "Insira o Organizador do Edital."),
+  contact: z.string(),
+  location: z.string(),
+  startDate: z.date({
+    error: "A data de início é obrigatória"
+  }),
+  endDate: z.date({
+    error: "A data de término é obrigatória"
+  }),
+  file: z.instanceof(FileList).refine((file) => file?.length == 1, "O PDF do Edital é obrigatório"),
+  categories: z.array(z.string()).min(1, "Pelo menos uma categoria deve ser selecionada."),
+  steps: z.array(stepSchema).min(1, "Adicione pelo menos uma etapa.")
+})
+
+
+type EditEdictValidation = z.infer<typeof schema>
+
+interface FormProps {
+  edict: EdictDTO
+}
+
+export function Form({ edict }: FormProps) {
+
   const [previewMode, setPreviewMode] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  const { register, handleSubmit, control, watch } = useForm<CreateEdictValidation>({
-    resolver: zodResolver(createEdictValidation),
+  const { register, watch, control } = useForm<EditEdictValidation>({
+    resolver: zodResolver(schema),
     defaultValues: {
+      title: edict.title,
+      description: edict.description,
+      organizer: edict.organizer,
       categories: [],
       steps: [{
         title: "",
@@ -58,71 +114,12 @@ export function Form() {
     name: "steps"
   });
 
-  async function uploadFile<T>(file: File): Promise<T> {
-    const formData = new FormData();
-    formData.set("file", file);
-
-    const response = await fetch(`/api/upload-file`, {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!response.ok) {
-      throw new Error(`Erro ao enviar`);
-    }
-
-    const data: T = await response.json();
-    return data
-  }
-
-  async function handleCreateEdictForm(data: CreateEdictValidation) {
-    setLoading(true)
-
-    if (!data.file?.[0]) {
-      toast.error("Arquivo do edital é obrigatório.");
-      return;
-    }
-
-    try {
-      const { url: edictUrl } = await uploadFile<{ url: string; error: boolean }>(data.file[0]);
-
-      const stepUploads = await Promise.all(
-        data.steps.map(async (s) => {
-          if (s.type === "Atividade" && s.file?.[0]) {
-            const { url } = await uploadFile<{ url: string; error: boolean }>(s.file[0]);
-            return url;
-          }
-          return null;
-        })
-      );
-
-      await edictGatewayHttp.create({
-        ...data,
-        file: edictUrl,
-        steps: data.steps.map((s, i) => {
-          if (s.type === "Atividade" && s.file?.[0]) {
-            return { ...s, file: stepUploads[i] };
-          }
-          return s;
-        }),
-      })
-
-      toast.success("Edital publicado com sucesso!");
-
-    } catch {
-      toast.error("Falha no upload. Verifique os arquivos e tente novamente.");
-    } finally {
-      setLoading(false)
-    }
-  }
-
   function handleIncreaseStep() {
     append({
       title: "",
       description: "",
       time: "",
       date: new Date(),
-      
     })
   }
 
@@ -130,13 +127,14 @@ export function Form() {
     remove(index)
   }
 
+
   const startDate = watch("startDate")
   const endEdictDate = watch("endDate")
   const descriptionWatched = watch("description")
 
 
   return (
-    <form className="space-y-8" onSubmit={handleSubmit(handleCreateEdictForm)} encType="multipart/form-data">
+    <form className="space-y-8" encType="multipart/form-data">
       <div className="space-y-6">
         <div className="flex items-center gap-2 mb-4">
           <FileText className="w-5 h-5 text-[#5127FF]" />
@@ -369,7 +367,7 @@ export function Form() {
           name="categories"
           render={({ field }) => (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-              {availableCategories.map((category) => {
+              {availableCategories?.map((category) => {
                 const isChecked = field.value.includes(category)
 
                 const toggleCategory = () => {

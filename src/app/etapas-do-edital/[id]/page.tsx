@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from "framer-motion"
 import { useState } from "react"
 import Link from "next/link"
 
-const trilhas = [
+const stages = [
   {
     id: "1",
     title: "Boas-vindas e Introdução",
@@ -54,33 +54,33 @@ export default function TrilhasDoEditalPage() {
       <div className="mb-10">
         <h1 className="text-3xl font-bold text-[#5127FF] mb-2">Etapas do edital</h1>
         <p className="text-muted-foreground">
-          Acompanhe as trilhas e etapas disponíveis neste edital.
+          Acompanhe as etapas disponíveis neste edital.
         </p>
       </div>
 
       <div className="space-y-6 relative">
-        {trilhas.map((trilha, index) => {
+        {stages.map((stage, index) => {
           const isOpen = openIndex === index
-          const isEvento = trilha.type === "evento"
-          const isAtividade = trilha.type === "atividade"
+          const isEvento = stage.type === "evento"
+          const isAtividade = stage.type === "atividade"
 
           return (
             <motion.div
-              key={trilha.id}
+              key={stage.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.08 }}
               className="relative flex gap-4"
             >
               <div className="flex flex-col items-center">
-                {trilha.status === "concluida" ? (
+                {stage.status === "concluida" ? (
                   <CheckCircle className="w-6 h-6 text-green-500" />
-                ) : trilha.status === "em_andamento" ? (
+                ) : stage.status === "em_andamento" ? (
                   <Clock3 className="w-6 h-6 text-yellow-500" />
                 ) : (
                   <Circle className="w-6 h-6 text-gray-300" />
                 )}
-                {index < trilhas.length - 1 && (
+                {index < stages.length - 1 && (
                   <div className="w-px h-20 bg-gray-200 mt-1" />
                 )}
               </div>
@@ -90,33 +90,33 @@ export default function TrilhasDoEditalPage() {
                   <div className="flex flex-col gap-2">
                     <div className="flex items-start justify-between gap-3">
                       <Link
-                        href={`/trilha/${trilha.id}`}
+                        href={`/etapa/${stage.id}`}
                         className="text-lg font-semibold text-[#5127FF] hover:underline underline-offset-2"
                       >
-                        {trilha.title}
+                        {stage.title}
                       </Link>
 
                       <div className="flex items-center gap-2">
                         <Badge
                           className={
-                            trilha.status === "concluida"
+                            stage.status === "concluida"
                               ? "bg-green-100 text-green-700"
-                              : trilha.status === "em_andamento"
-                              ? "bg-yellow-100 text-yellow-700"
-                              : "bg-gray-100 text-gray-700"
+                              : stage.status === "em_andamento"
+                                ? "bg-yellow-100 text-yellow-700"
+                                : "bg-gray-100 text-gray-700"
                           }
                         >
-                          {trilha.status === "concluida"
+                          {stage.status === "concluida"
                             ? "Concluída"
-                            : trilha.status === "em_andamento"
-                            ? "Em andamento"
-                            : "Pendente"}
+                            : stage.status === "em_andamento"
+                              ? "Em andamento"
+                              : "Pendente"}
                         </Badge>
 
                         <button
                           type="button"
                           aria-expanded={isOpen}
-                          aria-controls={`trilha-panel-${trilha.id}`}
+                          aria-controls={`stage-panel-${stage.id}`}
                           onClick={() => setOpenIndex(isOpen ? null : index)}
                           className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 hover:bg-gray-50 transition"
                         >
@@ -129,12 +129,12 @@ export default function TrilhasDoEditalPage() {
 
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-500 capitalize">
-                        {trilha.type}{" "}
-                        {"date" in trilha && trilha.date ? `• ${trilha.date}` : ""}
+                        {stage.type}{" "}
+                        {"date" in stage && stage.date ? `• ${stage.date}` : ""}
                       </span>
 
                       <Link
-                        href={`/trilhas/${trilha.id}`}
+                        href={`/etapa/${stage.id}`}
                         className="inline-flex items-center gap-1 text-sm font-medium text-[#5127FF] hover:opacity-90"
                       >
                         Ver detalhes
@@ -146,7 +146,7 @@ export default function TrilhasDoEditalPage() {
                   <AnimatePresence initial={false}>
                     {isOpen && (
                       <motion.div
-                        id={`trilha-panel-${trilha.id}`}
+                        id={`stage-panel-${stage.id}`}
                         initial="collapsed"
                         animate="open"
                         exit="collapsed"
@@ -160,38 +160,38 @@ export default function TrilhasDoEditalPage() {
                         <div className="mt-4 border-t pt-4 text-sm text-gray-700 space-y-2">
                           {isEvento && (
                             <>
-                              {"mode" in trilha && trilha.mode && (
+                              {"mode" in stage && stage.mode && (
                                 <p>
-                                  <span className="font-medium">Modalidade:</span> {trilha.mode}
+                                  <span className="font-medium">Modalidade:</span> {stage.mode}
                                 </p>
                               )}
-                              {"mode" in trilha &&
-                                trilha.mode === "presencial" &&
-                                "address" in trilha &&
-                                trilha.address && (
+                              {"mode" in stage &&
+                                stage.mode === "presencial" &&
+                                "address" in stage &&
+                                stage.address && (
                                   <p>
-                                    <span className="font-medium">Endereço:</span> {trilha.address}
+                                    <span className="font-medium">Endereço:</span> {stage.address}
                                   </p>
                                 )}
-                              {"mode" in trilha &&
-                                trilha.mode === "online" &&
-                                "link" in trilha &&
-                                trilha.link && (
+                              {"mode" in stage &&
+                                stage.mode === "online" &&
+                                "link" in stage &&
+                                stage.link && (
                                   <p>
                                     <span className="font-medium">Link:</span>{" "}
                                     <a
-                                      href={trilha.link}
+                                      href={stage.link}
                                       target="_blank"
                                       rel="noopener noreferrer"
                                       className="text-blue-600 underline"
                                     >
-                                      {trilha.link}
+                                      {stage.link}
                                     </a>
                                   </p>
                                 )}
-                              {"time" in trilha && trilha.time && (
+                              {"time" in stage && stage.time && (
                                 <p>
-                                  <span className="font-medium">Horário:</span> {trilha.time}
+                                  <span className="font-medium">Horário:</span> {stage.time}
                                 </p>
                               )}
                             </>
@@ -199,16 +199,16 @@ export default function TrilhasDoEditalPage() {
 
                           {isAtividade && (
                             <>
-                              {"activityTitle" in trilha && trilha.activityTitle && (
+                              {"activityTitle" in stage && stage.activityTitle && (
                                 <p>
                                   <span className="font-medium">Atividade:</span>{" "}
-                                  {trilha.activityTitle}
+                                  {stage.activityTitle}
                                 </p>
                               )}
-                              {"activityDescription" in trilha && trilha.activityDescription && (
+                              {"activityDescription" in stage && stage.activityDescription && (
                                 <p>
                                   <span className="font-medium">Descrição:</span>{" "}
-                                  {trilha.activityDescription}
+                                  {stage.activityDescription}
                                 </p>
                               )}
                             </>

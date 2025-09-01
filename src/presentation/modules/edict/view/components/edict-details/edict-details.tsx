@@ -1,99 +1,122 @@
-import { useCallback, useEffect, useState } from "react";
+'use client'
 
-import { Badge } from "@/presentation/external/components/ui/badge";
-
-import { GetAllEdictDTO } from "@/infra/modules/edict/dto/get-all-edict-dto";
-import { edictGatewayHttp } from "@/infra/modules/edict/edict-gateway-http";
-import { Button } from "@/presentation/external/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/presentation/external/components/ui/card";
-import { Calendar, Clock } from "lucide-react";
-
+import { Badge } from "@/presentation/external/components/ui/badge"
+import { Button } from "@/presentation/external/components/ui/button"
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogTrigger,
-} from "@/presentation/external/components/ui/dialog"
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/presentation/external/components/ui/card"
+import { Separator } from "@/presentation/external/components/ui/separator"
+import { ArrowRight } from "lucide-react"
+import { motion } from "framer-motion"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
 
-export function EdictDetails() {
+interface Edict {
+  edict: {
+    id: number
+    status: string
+    title: string
+    description: string
+    file: string
+    startDate: Date
+    organizer: string
+    endDate: Date
+    categories: string[]
+  }
+}
 
-  const [edict, setEdict] = useState<GetAllEdictDTO[] | null>(null)
-
-  const getAllEdicts = useCallback(async () => {
-    await edictGatewayHttp.getAll().then(setEdict)
-  }, [])
-
-  useEffect(() => {
-    getAllEdicts()
-  }, [getAllEdicts])
+export function EdictDetailsSection({ edict }: Edict) {
 
   return (
-   <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900">Editais</h2>
-        <Button
-          variant="outline"
-          className="border-[#5127FF] text-[#5127FF] hover:bg-[#5127FF] hover:text-white"
-        >
-          Ver Todos
-        </Button>
-      </div>
+    <div className="min-h-screen bg-white py-12 px-6 lg:px-32">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="grid lg:grid-cols-3 gap-8"
+      >
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {edict?.map((edict) => (
-          <Card key={edict.id} className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <div className="flex items-start justify-between gap-2">
-                <CardTitle className="text-lg leading-tight">{edict.title}</CardTitle>
-                <Badge variant="secondary" className="bg-[#F4DA02]/20 text-[#5127FF] shrink-0">
-                  {edict?.tags?.[0]}
-                </Badge>
-              </div>
-              <CardDescription className="text-sm">{edict.description}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-4 text-sm text-gray-600">
-                <div className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  <span>{new Date(edict.startDate).toLocaleDateString()}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Clock className="w-4 h-4" />
-                  <span>{new Date(edict.endDate).toLocaleDateString()}</span>
-                </div>
-              </div>
-              {edict.isSubscribed ? (
-                <span className="block text-center text-sm text-green-600 font-semibold mt-6">
-                  Você já está inscrito nesse edital
-                </span>
-              ) : (
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button className="w-full text-white bg-[#5127FF] hover:bg-[#5127FF]/90">Inscrever-se</Button>
-                  </DialogTrigger>
-                  <DialogContent className="bg-[#1E1B2E] text-white border border-[#312E44] rounded-2xl shadow-xl p-6">
-                    <DialogHeader>
-                      <DialogTitle className="text-2xl font-bold">Confirmar inscrição?</DialogTitle>
-                    </DialogHeader>
-                    <p className="text-white/80 text-sm mt-2">Você deseja se inscrever neste edital?</p>
-                    <DialogFooter className="mt-6 flex justify-end gap-2">
-                      <DialogTrigger asChild>
-                        <Button variant="ghost" className="text-white hover:bg-white/10">Cancelar</Button>
-                      </DialogTrigger>
-                      <Button className="bg-[#F4DA02] text-[#1E1B2E] font-semibold hover:bg-[#F4DA02]/90">
-                        Confirmar
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              )}
+        <div className="lg:col-span-2 space-y-8">
+          <div>
+            <Badge className="bg-[#5127FF] text-white px-3 py-1 rounded-full">
+              Edital Aberto
+            </Badge>
+            <h1 className="text-4xl font-bold mt-4 text-[#5127FF]">
+              {edict.title}
+            </h1>
 
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+            <div className="flex gap-2 mt-6">
+              {edict?.categories?.map((category, index) => (
+                <Badge key={index} className="bg-[#5127FF] text-white">{category}</Badge>
+              ))}
+            </div>
+          </div>
+
+          <Separator />
+
+          <div className="prose max-w-none whitespace-pre-line">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {edict.description}
+            </ReactMarkdown>
+          </div>
+        </div>
+
+        <Card className="shadow-md rounded-2xl border border-[#e5e7eb] h-fit sticky top-12">
+          <CardHeader>
+            <CardTitle className="text-xl">Informações rápidas</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 text-sm">
+            <div className="flex flex-col items-start gap-2">
+              <h3 className="font-semibold text-base">
+                Período de Inscrição
+              </h3>
+              <span className="text-gray-500">{new Date(edict.startDate).toLocaleString("pt-BR", {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+              })} à {new Date(edict.endDate).toLocaleString("pt-BR", {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+              })}</span>
+            </div>
+
+            <div className="flex flex-col items-start gap-2">
+              <h3 className="font-semibold text-base">
+                Organizador
+              </h3>
+              <span className="text-gray-500">
+                {edict.organizer}
+              </span>
+            </div>
+
+            <div className="flex flex-col items-start gap-2">
+              <h3 className="font-semibold text-base">Mais informações</h3>
+              <a
+                href={edict.file}
+                className="text-[#5127FF] hover:underline"
+                target="_blank"
+              >
+                Ver PDF do Edital
+              </a>
+            </div>
+
+            <Separator />
+
+            <Button className="w-full bg-[#F4DA02] hover:bg-[#e7cc01] text-black font-semibold transition-transform hover:scale-105">
+              Inscreva-se até {new Date(edict.endDate).toLocaleString("pt-BR", {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+              })}
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   )
 }

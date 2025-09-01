@@ -13,7 +13,7 @@ import {
 } from "@/presentation/external/components/ui/sidebar"
 import { APP_ROUTES } from "@/shared/constants/routes"
 
-import { Home, FileText, UsersIcon, BarChart3, LogOut } from "lucide-react"
+import { Home, FileText, UsersIcon, BarChart3, LogOut, UserRoundCog } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { EnumProfile } from "./profile/profile"
@@ -27,9 +27,10 @@ export function HomeSideBar({ role }: HomeSideBarProps) {
 
   const allMenuItems = [
     { title: "Home", icon: Home, url: APP_ROUTES.home },
-    { title: "Editais", icon: FileText, url: APP_ROUTES.create_edict, onAdmin: true },
-    { title: "Mentores", icon: UsersIcon, url: "#" },
+    { title: "Meus editais", icon: FileText, url: "/meus-editais" },
+    { title: "Mentores", icon: UsersIcon, url: "/mentores" },
     { title: "Meu progresso", icon: BarChart3, url: "#" },
+    { title: "Área do Administrador", icon: UserRoundCog, url: "/adm", onAdmin: true }
   ]
 
   const menuItems = allMenuItems.filter(item => {
@@ -42,9 +43,9 @@ export function HomeSideBar({ role }: HomeSideBarProps) {
   }
 
   return (
-    <Sidebar className="border-r-0">
+    <Sidebar className="border-r-1 border-[#000]/10">
       <SidebarHeader className="p-6">
-        <div className="flex justify-center items-center gap-2">
+        <div className="flex justify-start items-center gap-2">
           <Image src="/icons/logo.svg" width={150} height={60} alt="Logo da Kadoo" />
         </div>
       </SidebarHeader>
