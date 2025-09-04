@@ -14,6 +14,8 @@ export default async function EditEdictPage({
 
   if (!edict) return notFound()
 
+    console.log(edict)
+
   return (
     <EditEdictSection edict={edict} />
   )

@@ -20,7 +20,7 @@ export class AxiosAdapter implements HttpClient {
       // if (token) {
       //   config.headers.Authorization = `Bearer ${token}`;
       // }
-      config.headers.Authorization = `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrYWRvby1hcGkiLCJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJpZCI6NywibmFtZSI6InBlZHJvIGhlbnJpcXVlIiwicm9sZSI6IlJPTEVfQURNSU4iLCJlbWFpbCI6ImFkbWluQGdtYWlsLmNvbSIsImV4cCI6MTc1Njc3MzI4OH0.v0JB3pK1sZuxrW3fB8nps07MK8hhIRwZoLpWLMAMrCE`
+      config.headers.Authorization = `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrYWRvby1hcGkiLCJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJpZCI6MSwibmFtZSI6InBlZHJvIGhlbnJpcXVlIiwicm9sZSI6IlJPTEVfVU5LTk9XTiIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiZXhwIjoxNzU3MDA5MTE3fQ.n8NVVWJAQogkNySq84o_uHdwyj81-BUfVbRbAxEtR7M`
       return config;
     });
   }

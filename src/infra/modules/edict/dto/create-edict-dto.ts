@@ -26,7 +26,7 @@ export interface CreateEdictDTO {
 }
 
 type EventBase = {
-  type: "Evento"
+  format: "Evento"
   title: string
   description: string
   time: string
@@ -35,18 +35,17 @@ type EventBase = {
 
 
 type EventPresencial = EventBase & {
-  format: "Presencial"
+  mode: "Presencial"
   address?: string
 }
 
 type EventOnline = EventBase & {
-  format: "Online"
+  mode: "Online"
   meetingLink?: string
 }
 
 type ActivityStep = {
-  type?: "Atividade"
-  activityTitle: string
+  format?: "Atividade"
   dueDate?: Date | undefined
   activityPDF?: string
 }

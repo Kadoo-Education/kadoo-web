@@ -5,6 +5,8 @@ export interface EdictDTO {
   description: string
   organizer: string
   file: string
+  contact: string
+  location: string
   startDate: Date
   endDate: Date
   categories: string[]

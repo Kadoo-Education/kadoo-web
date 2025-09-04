@@ -1,7 +1,7 @@
 import z from "zod";
 
 const schemaBaseTrails = z.object({
-  type: z.literal("Evento"),
+  format: z.literal("Evento"),
   title: z.string(),
   description: z.string(),
   time: z.string(),
@@ -9,25 +9,24 @@ const schemaBaseTrails = z.object({
 })
 
 const schemaPresencialTrail = schemaBaseTrails.extend({
-  format: z.literal("Presencial"),
+  mode: z.literal("Presencial"),
   address: z.string().optional(),
 })
 
 const schemaOnlineTrail = schemaBaseTrails.extend({
-  format: z.literal("Online"),
+  mode: z.literal("Online"),
   meetingLink: z.string().optional(),
 })
 
-const eventSchema = z.discriminatedUnion("format", [schemaPresencialTrail, schemaOnlineTrail])
+const eventSchema = z.discriminatedUnion("mode", [schemaPresencialTrail, schemaOnlineTrail])
 
 const schemaActivity = z.object({
-  type: z.literal("Atividade").optional(),
-  activityTitle: z.string(),
+  format: z.literal("Atividade").optional(),
   file: z.instanceof(FileList),
   dueDate: z.date().optional(),
 })
 
-const stepSchema = z.discriminatedUnion("type", [eventSchema, schemaActivity])
+const stepSchema = z.discriminatedUnion("format", [eventSchema, schemaActivity])
 
 export const createEdictValidation = z.object({
   title: z.string().min(1, "Título é obrigatório."),

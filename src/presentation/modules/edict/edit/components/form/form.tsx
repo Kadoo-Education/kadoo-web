@@ -38,7 +38,7 @@ const availableCategories = [
 ]
 
 const schemaBaseTrails = z.object({
-  type: z.literal("Evento"),
+  format: z.literal("Evento"),
   title: z.string(),
   description: z.string(),
   time: z.string(),
@@ -46,25 +46,24 @@ const schemaBaseTrails = z.object({
 })
 
 const schemaPresencialTrail = schemaBaseTrails.extend({
-  format: z.literal("Presencial"),
+  mode: z.literal("Presencial"),
   address: z.string().optional(),
 })
 
 const schemaOnlineTrail = schemaBaseTrails.extend({
-  format: z.literal("Online"),
+  mode: z.literal("Online"),
   meetingLink: z.string().optional(),
 })
 
-const eventSchema = z.discriminatedUnion("format", [schemaPresencialTrail, schemaOnlineTrail])
+const eventSchema = z.discriminatedUnion("mode", [schemaPresencialTrail, schemaOnlineTrail])
 
 const schemaActivity = z.object({
-  type: z.literal("Atividade").optional(),
-  activityTitle: z.string(),
-  file: z.instanceof(FileList),
+  format: z.literal("Atividade").optional(),
+  file: z.instanceof(File),
   dueDate: z.date().optional(),
 })
 
-const stepSchema = z.discriminatedUnion("type", [eventSchema, schemaActivity])
+const stepSchema = z.discriminatedUnion("format", [eventSchema, schemaActivity])
 
 
 const schema = z.object({
@@ -79,7 +78,7 @@ const schema = z.object({
   endDate: z.date({
     error: "A data de término é obrigatória"
   }),
-  file: z.instanceof(FileList).refine((file) => file?.length == 1, "O PDF do Edital é obrigatório"),
+  file: z.instanceof(File),
   categories: z.array(z.string()).min(1, "Pelo menos uma categoria deve ser selecionada."),
   steps: z.array(stepSchema).min(1, "Adicione pelo menos uma etapa.")
 })
@@ -87,8 +86,32 @@ const schema = z.object({
 
 type EditEdictValidation = z.infer<typeof schema>
 
+interface Step {
+  id: number
+  title: string
+  description: string
+  time: string
+  date: Date
+  address: string
+  dueDate: Date
+  activityFile: string
+}
+
 interface FormProps {
-  edict: EdictDTO
+  edict: {
+    id: number
+    status: string
+    title: string
+    description: string
+    organizer: string
+    file: string
+    contact: string
+    location: string
+    startDate: Date
+    endDate: Date
+    categories: string[]
+    steps: Step[]
+  }
 }
 
 export function Form({ edict }: FormProps) {
@@ -96,22 +119,28 @@ export function Form({ edict }: FormProps) {
   const [previewMode, setPreviewMode] = useState(false)
   const [loading, setLoading] = useState(false)
 
+
   const { register, watch, control } = useForm<EditEdictValidation>({
     resolver: zodResolver(schema),
     defaultValues: {
       title: edict.title,
       description: edict.description,
       organizer: edict.organizer,
-      categories: [],
-      steps: [{
-        title: "",
-      }]
+      contact: edict.contact,
+      location: edict.location,
+      startDate: edict.startDate,
+      endDate: edict.endDate,
+      categories: edict.categories,
+      steps: edict.steps
     },
+
+    shouldUnregister: false,
   })
 
   const { fields: steps, append, remove } = useFieldArray({
     control,
-    name: "steps"
+    name: "steps",
+    keyName: "fieldId"
   });
 
   function handleIncreaseStep() {
@@ -403,15 +432,15 @@ export function Form({ edict }: FormProps) {
       </div>
 
       {steps.map((step, index) => {
-        const typeEdict = watch(`steps.${index}.type`);
-        const eventMode = watch(`steps.${index}.format`);
+        const eventFormat = watch(`steps.${index}.format`);
+        const mode = watch(`steps.${index}.mode`);
 
         const date = watch(`steps.${index}.date`)
 
         const dueDateActivity = watch(`steps.${index}.dueDate`)
 
         return (
-          <div key={step.id} className="mb-6 p-4 border border-dashed rounded-md shadow-sm bg-white space-y-4 w-full">
+          <div key={step.fieldId} className="mb-6 p-4 border border-dashed rounded-md shadow-sm bg-white space-y-4 w-full">
 
             <div className="flex items-center justify-between">
               <span>Etapa {index + 1}</span>
@@ -496,12 +525,12 @@ export function Form({ edict }: FormProps) {
                 </Popover>
               </Input.Root>
               <Input.Root>
-                <Input.Label htmlFor={`steps.${index}.type`}>Formato da Etapa</Input.Label>
+                <Input.Label htmlFor={`steps.${index}.format`}>Formato da Etapa</Input.Label>
                 <Controller
                   control={control}
-                  name={`steps.${index}.type`}
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <Select onValueChange={onChange} defaultValue={value}>
+                  name={`steps.${index}.format`}
+                  render={({ field: { onChange, onBlur } }) => (
+                    <Select value={eventFormat} onValueChange={onChange}>
                       <SelectTrigger className="w-full" onBlur={onBlur}>
                         <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
@@ -511,17 +540,18 @@ export function Form({ edict }: FormProps) {
                       </SelectContent>
                     </Select>
                   )}
-                /></Input.Root>
+                />
+              </Input.Root>
             </div>
 
-            {typeEdict === "Evento" && (
+            {eventFormat === "Evento" && (
               <>
 
                 <div>
-                  <Input.Label htmlFor={`steps.${index}.format`}>Modalidade do Evento</Input.Label>
+                  <Input.Label htmlFor={`steps.${index}.mode`}>Modalidade do Evento</Input.Label>
                   <Controller
                     control={control}
-                    name={`steps.${index}.format`}
+                    name={`steps.${index}.mode`}
                     render={({ field: { onChange, onBlur, value } }) => (
                       <Select onValueChange={onChange} defaultValue={value}>
                         <SelectTrigger className="w-full mt-2" onBlur={onBlur}>
@@ -536,7 +566,7 @@ export function Form({ edict }: FormProps) {
                   />
                 </div>
 
-                {eventMode === "Presencial" && (
+                {mode === "Presencial" && (
                   <Input.Root>
                     <Input.Label htmlFor={`steps.${index}.address`}>Endereço</Input.Label>
                     <Input.Core
@@ -548,7 +578,7 @@ export function Form({ edict }: FormProps) {
                   </Input.Root>
                 )}
 
-                {eventMode === "Online" && (
+                {mode === "Online" && (
                   <Input.Root>
                     <Input.Label htmlFor={`steps.${index}.meetingLink`}>Link da Reunião</Input.Label>
                     <Input.Core
@@ -562,18 +592,8 @@ export function Form({ edict }: FormProps) {
               </>
             )}
 
-            {typeEdict === "Atividade" && (
+            {eventFormat === "Atividade" && (
               <>
-                <Input.Root>
-                  <Input.Label htmlFor={`steps.${index}.activityTitle`}>Título da Atividade</Input.Label>
-                  <Input.Core
-                    id={`steps.${index}.activityTitle`}
-                    placeholder="Digite o título da atividade"
-                    {...register(`steps.${index}.activityTitle`)}
-                    className="w-full"
-                  />
-                </Input.Root>
-
                 <Input.Root>
                   <Input.Label htmlFor="startDate" className="text-sm font-medium text-gray-700 block">
                     Data de Entrega *

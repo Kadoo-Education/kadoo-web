@@ -76,6 +76,10 @@ export function Form() {
   }
 
   async function handleCreateEdictForm(data: CreateEdictValidation) {
+
+    console.log(data)
+
+
     setLoading(true)
 
     if (!data.file?.[0]) {
@@ -88,7 +92,7 @@ export function Form() {
 
       const stepUploads = await Promise.all(
         data.steps.map(async (s) => {
-          if (s.type === "Atividade" && s.file?.[0]) {
+          if (s.format === "Atividade" && s.file?.[0]) {
             const { url } = await uploadFile<{ url: string; error: boolean }>(s.file[0]);
             return url;
           }
@@ -99,11 +103,11 @@ export function Form() {
       await edictGatewayHttp.create({
         ...data,
         file: edictUrl,
-        steps: data.steps.map((s, i) => {
-          if (s.type === "Atividade" && s.file?.[0]) {
-            return { ...s, file: stepUploads[i] };
+        steps: data.steps.map((step, i) => {
+          if (step.format === "Atividade" && step.file?.[0]) {
+            return { ...step, file: stepUploads[i] };
           }
-          return s;
+          return step
         }),
       })
 
@@ -122,7 +126,7 @@ export function Form() {
       description: "",
       time: "",
       date: new Date(),
-      
+
     })
   }
 
@@ -405,8 +409,8 @@ export function Form() {
       </div>
 
       {steps.map((step, index) => {
-        const typeEdict = watch(`steps.${index}.type`);
-        const eventMode = watch(`steps.${index}.format`);
+        const eventFormat = watch(`steps.${index}.format`);
+        const mode = watch(`steps.${index}.mode`);
 
         const date = watch(`steps.${index}.date`)
 
@@ -498,10 +502,10 @@ export function Form() {
                 </Popover>
               </Input.Root>
               <Input.Root>
-                <Input.Label htmlFor={`steps.${index}.type`}>Formato da Etapa</Input.Label>
+                <Input.Label htmlFor={`steps.${index}.format`}>Formato da Etapa</Input.Label>
                 <Controller
                   control={control}
-                  name={`steps.${index}.type`}
+                  name={`steps.${index}.format`}
                   render={({ field: { onChange, onBlur, value } }) => (
                     <Select onValueChange={onChange} defaultValue={value}>
                       <SelectTrigger className="w-full" onBlur={onBlur}>
@@ -516,14 +520,14 @@ export function Form() {
                 /></Input.Root>
             </div>
 
-            {typeEdict === "Evento" && (
+            {eventFormat === "Evento" && (
               <>
 
                 <div>
-                  <Input.Label htmlFor={`steps.${index}.format`}>Modalidade do Evento</Input.Label>
+                  <Input.Label htmlFor={`steps.${index}.mode`}>Modalidade do Evento</Input.Label>
                   <Controller
                     control={control}
-                    name={`steps.${index}.format`}
+                    name={`steps.${index}.mode`}
                     render={({ field: { onChange, onBlur, value } }) => (
                       <Select onValueChange={onChange} defaultValue={value}>
                         <SelectTrigger className="w-full mt-2" onBlur={onBlur}>
@@ -538,7 +542,7 @@ export function Form() {
                   />
                 </div>
 
-                {eventMode === "Presencial" && (
+                {mode === "Presencial" && (
                   <Input.Root>
                     <Input.Label htmlFor={`steps.${index}.address`}>Endereço</Input.Label>
                     <Input.Core
@@ -550,7 +554,7 @@ export function Form() {
                   </Input.Root>
                 )}
 
-                {eventMode === "Online" && (
+                {mode === "Online" && (
                   <Input.Root>
                     <Input.Label htmlFor={`steps.${index}.meetingLink`}>Link da Reunião</Input.Label>
                     <Input.Core
@@ -564,18 +568,8 @@ export function Form() {
               </>
             )}
 
-            {typeEdict === "Atividade" && (
+            {eventFormat === "Atividade" && (
               <>
-                <Input.Root>
-                  <Input.Label htmlFor={`steps.${index}.activityTitle`}>Título da Atividade</Input.Label>
-                  <Input.Core
-                    id={`steps.${index}.activityTitle`}
-                    placeholder="Digite o título da atividade"
-                    {...register(`steps.${index}.activityTitle`)}
-                    className="w-full"
-                  />
-                </Input.Root>
-
                 <Input.Root>
                   <Input.Label htmlFor="startDate" className="text-sm font-medium text-gray-700 block">
                     Data de Entrega *
