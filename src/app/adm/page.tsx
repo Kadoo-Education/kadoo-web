@@ -5,11 +5,10 @@ import { userGatewayHttp } from "@/infra/modules/user/user-gateway-http";
 import { Button } from "@/presentation/external/components/ui/button";
 import { Card, CardContent } from "@/presentation/external/components/ui/card";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from "@/presentation/external/components/ui/sidebar";
-import { Loading } from "@/presentation/shared/layout/components/loading/loading";
 import { EnumProfile } from "@/presentation/shared/layout/components/profile/profile";
 import { APP_ROUTES } from "@/shared/constants/routes";
 import { Avatar, AvatarImage, AvatarFallback } from "@/presentation/external/components/ui/avatar";
-import { Home, FileText, UsersIcon, BarChart3, LogOut, UserRoundCog, Calendar } from "lucide-react";
+import { Home, FileText, UsersIcon, BarChart3, LogOut, UserRoundCog, Calendar, Settings } from "lucide-react";
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -27,7 +26,6 @@ import {
   BarChart
 } from "recharts";
 import { ChartConfig, ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "@/presentation/external/components/ui/chart";
-import { edicts } from "@/presentation/modules/home/components/home-section/home-section";
 import Link from "next/link";
 import { edictGatewayHttp } from "@/infra/modules/edict/edict-gateway-http";
 
@@ -36,7 +34,8 @@ const menuItems = [
   { title: "Meus editais", icon: FileText, url: "/meus-editais" },
   { title: "Mentores", icon: UsersIcon, url: "/mentores" },
   { title: "Meu progresso", icon: BarChart3, url: "#" },
-  { title: "Área do Administrador", icon: UserRoundCog, url: "/adm", onAdmin: true }
+  { title: "Área do Administrador", icon: UserRoundCog, url: "/adm", onAdmin: true },
+  { title: "Usuários", icon: Settings, url: "/adm/gerenciar-usuarios", onAdmin: true }
 ]
 
 
@@ -239,10 +238,10 @@ export default function AdminPage() {
     getAllEdicts()
   }, [getUser, getAllEdicts])
 
-  if (!user) return <Loading />
+  // if (!user) return <Loading />
 
   const firstName = user?.name.split(" ")[0]
-  const role = user.role
+  const role = user?.role
 
   async function handleLogOut() {
     await loginGatewayHttp.logout().then(() => push(APP_ROUTES.login))
@@ -255,7 +254,7 @@ export default function AdminPage() {
     [EnumProfile.ROLE_ADMIN]: "Administrador"
   }
 
-  const firstLetter = user.name?.charAt(0).toUpperCase();
+  const firstLetter = user?.name?.charAt(0).toUpperCase();
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -300,7 +299,6 @@ export default function AdminPage() {
         </Sidebar>
         <SidebarInset>
 
-          {/* HEADER */}
 
           <header className="flex items-center justify-between p-6 bg-white border-b">
             <div className="flex items-center gap-4">
@@ -316,8 +314,8 @@ export default function AdminPage() {
                   <AvatarFallback className="bg-[#5127FF] text-white">{firstLetter}</AvatarFallback>
                 </Avatar>
                 <div className="hidden md:block">
-                  <p className="font-medium text-gray-900">{user.name}</p>
-                  <p className="text-sm text-gray-600">{ROLE_USER[role]}</p>
+                  <p className="font-medium text-gray-900">{user?.name}</p>
+                  <p className="text-sm text-gray-600">{ROLE_USER?.[role]}</p>
                 </div>
               </div>
             </div>

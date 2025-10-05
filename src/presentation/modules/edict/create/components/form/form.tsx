@@ -42,8 +42,10 @@ const availableCategories = [
 export function Form() {
   const [previewMode, setPreviewMode] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [edictFile, setEdictFile] = useState<File | null>(null)
+  const [activityFile, setActivityFile] = useState<File | null>(null)
 
-  const { register, handleSubmit, control, watch } = useForm<CreateEdictValidation>({
+  const { register, handleSubmit, control, watch, formState: { errors } } = useForm<CreateEdictValidation>({
     resolver: zodResolver(createEdictValidation),
     defaultValues: {
       categories: [],
@@ -75,40 +77,39 @@ export function Form() {
     return data
   }
 
+  console.log(errors)
+
   async function handleCreateEdictForm(data: CreateEdictValidation) {
-
-    console.log(data)
-
 
     setLoading(true)
 
-    if (!data.file?.[0]) {
+    console.log(data, edictFile, activityFile)
+
+    if (!edictFile) {
       toast.error("Arquivo do edital é obrigatório.");
       return;
     }
 
     try {
-      const { url: edictUrl } = await uploadFile<{ url: string; error: boolean }>(data.file[0]);
+      const { url: edictUrl } = await uploadFile<{ url: string; error: boolean }>(edictFile);
 
       const stepUploads = await Promise.all(
         data.steps.map(async (s) => {
-          if (s.format === "Atividade" && s.file?.[0]) {
-            const { url } = await uploadFile<{ url: string; error: boolean }>(s.file[0]);
+          if (s.format === "Atividade" && activityFile) {
+            const { url } = await uploadFile<{ url: string; error: boolean }>(activityFile);
             return url;
           }
-          return null;
+          return undefined;
         })
-      );
+      )
 
       await edictGatewayHttp.create({
         ...data,
         file: edictUrl,
-        steps: data.steps.map((step, i) => {
-          if (step.format === "Atividade" && step.file?.[0]) {
-            return { ...step, file: stepUploads[i] };
-          }
-          return step
-        }),
+        steps: data.steps.map((step, i) => ({
+          ...step,
+          file: stepUploads[i],
+        })),
       })
 
       toast.success("Edital publicado com sucesso!");
@@ -124,7 +125,6 @@ export function Form() {
     append({
       title: "",
       description: "",
-      time: "",
       date: new Date(),
 
     })
@@ -347,14 +347,19 @@ export function Form() {
         </div>
 
         <Input.Root >
-          <Input.Label className="text-sm font-medium text-gray-700 block">Arquivo PDF do edital
+          <Input.Label className="text-sm font-medium text-gray-700 block">
+            Arquivo PDF do edital
           </Input.Label>
+
 
           <Input.Core
             type="file"
             accept="application/pdf"
             className="w-full"
-            {...register("file")}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              const file = e.target.files?.[0] ?? null
+              setEdictFile(file)
+            }}
           />
         </Input.Root>
       </div>
@@ -458,14 +463,6 @@ export function Form() {
               />
             </Input.Root>
 
-            <Input.Root>
-              <Input.Label>Horário *</Input.Label>
-              <Input.Core
-                type="time"
-                {...register(`steps.${index}.time`)}
-              />
-            </Input.Root>
-
             <div className="flex items-center justify-between gap-6">
 
               <Input.Root>
@@ -517,108 +514,103 @@ export function Form() {
                       </SelectContent>
                     </Select>
                   )}
-                /></Input.Root>
+                />
+              </Input.Root>
             </div>
 
-            {eventFormat === "Evento" && (
-              <>
-
-                <div>
-                  <Input.Label htmlFor={`steps.${index}.mode`}>Modalidade do Evento</Input.Label>
-                  <Controller
-                    control={control}
-                    name={`steps.${index}.mode`}
-                    render={({ field: { onChange, onBlur, value } }) => (
-                      <Select onValueChange={onChange} defaultValue={value}>
-                        <SelectTrigger className="w-full mt-2" onBlur={onBlur}>
-                          <SelectValue placeholder="Selecione uma modalidade" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Presencial">Presencial</SelectItem>
-                          <SelectItem value="Online">Online</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
-                </div>
-
-                {mode === "Presencial" && (
-                  <Input.Root>
-                    <Input.Label htmlFor={`steps.${index}.address`}>Endereço</Input.Label>
-                    <Input.Core
-                      id={`steps.${index}.address`}
-                      placeholder="Informe o endereço do Evento"
-                      {...register(`steps.${index}.address`)}
-                      className="w-full"
-                    />
-                  </Input.Root>
+            <div>
+              <Input.Label htmlFor={`steps.${index}.mode`}>Modalidade do Evento <span className="text-gray-400">(se for Evento)</span></Input.Label>
+              <Controller
+                control={control}
+                name={`steps.${index}.mode`}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <Select onValueChange={onChange} defaultValue={value}>
+                    <SelectTrigger className="w-full mt-2" onBlur={onBlur}>
+                      <SelectValue placeholder="Selecione uma modalidade" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Presencial">Presencial</SelectItem>
+                      <SelectItem value="Online">Online</SelectItem>
+                    </SelectContent>
+                  </Select>
                 )}
+              />
+            </div>
 
-                {mode === "Online" && (
-                  <Input.Root>
-                    <Input.Label htmlFor={`steps.${index}.meetingLink`}>Link da Reunião</Input.Label>
-                    <Input.Core
-                      id={`steps.${index}.meetingLink`}
-                      placeholder="Informe o link da reunião"
-                      {...register(`steps.${index}.meetingLink`)}
-                      className="w-full"
+            <Input.Root>
+              <Input.Label htmlFor={`steps.${index}.address`}>Endereço <span className="text-gray-400">(se for Presencial)</span></Input.Label>
+              <Input.Core
+                id={`steps.${index}.address`}
+                placeholder="Informe o endereço do Evento"
+                {...register(`steps.${index}.address`)}
+                className="w-full"
+              />
+            </Input.Root>
+
+            <Input.Root>
+              <Input.Label htmlFor={`steps.${index}.meetingLink`}>Link da Reunião <span className="text-gray-400">(se for Online)</span></Input.Label>
+              <Input.Core
+                id={`steps.${index}.meetingLink`}
+                placeholder="Informe o link da reunião"
+                {...register(`steps.${index}.meetingLink`)}
+                className="w-full"
+              />
+            </Input.Root>
+
+
+            <>
+              <Input.Root>
+                <Input.Label htmlFor="startDate" className="text-sm font-medium text-gray-700 block">
+                  Data de Entrega <span className="text-gray-400">(se for Atividade)</span>
+                </Input.Label>
+
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button disabled={!startDate} variant="outline" className={cn(
+                      "w-[240px] pl-3 text-left font-normal",
+                      !dueDateActivity && "text-muted-foreground"
+                    )}>
+                      <span className="text-left w-full">{dueDateActivity ? (
+                        format(dueDateActivity, "PPP", { locale: ptBR })
+                      ) : (
+                        "Selecione uma data"
+                      )}</span>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent>
+                    <Controller
+                      control={control}
+                      name={`steps.${index}.dueDate`}
+                      render={({ field: { onChange, onBlur } }) => (
+                        <CalendarShad
+                          mode="single"
+                          selected={dueDateActivity}
+                          onDayBlur={onBlur}
+                          onSelect={onChange}
+                          locale={ptBR}
+                          captionLayout="dropdown"
+                        />
+                      )}
                     />
-                  </Input.Root>
-                )}
-              </>
-            )}
 
-            {eventFormat === "Atividade" && (
-              <>
-                <Input.Root>
-                  <Input.Label htmlFor="startDate" className="text-sm font-medium text-gray-700 block">
-                    Data de Entrega *
-                  </Input.Label>
+                  </PopoverContent>
+                </Popover>
+              </Input.Root>
 
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button disabled={!startDate} variant="outline" className={cn(
-                        "w-[240px] pl-3 text-left font-normal",
-                        !dueDateActivity && "text-muted-foreground"
-                      )}>
-                        <span className="text-left w-full">{dueDateActivity ? (
-                          format(dueDateActivity, "PPP", { locale: ptBR })
-                        ) : (
-                          "Selecione uma data"
-                        )}</span>
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent>
-                      <Controller
-                        control={control}
-                        name={`steps.${index}.dueDate`}
-                        render={({ field: { onChange, onBlur } }) => (
-                          <CalendarShad
-                            mode="single"
-                            selected={dueDateActivity}
-                            onDayBlur={onBlur}
-                            onSelect={onChange}
-                            locale={ptBR}
-                            captionLayout="dropdown"
-                          />
-                        )}
-                      />
+              <Input.Root>
+                <Input.Label>PDF da Atividade <span className="text-gray-400">(se for Atividade)</span></Input.Label>
 
-                    </PopoverContent>
-                  </Popover>
-                </Input.Root>
-
-                <Input.Root>
-                  <Input.Label>PDF da Atividade</Input.Label>
-                  <Input.Core
-                    type="file"
-                    accept="application/pdf"
-                    className="w-full"
-                    {...register(`steps.${index}.file`)}
-                  />
-                </Input.Root>
-              </>
-            )}
+                <Input.Core
+                  type="file"
+                  accept="application/pdf"
+                  className="w-full"
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    const file = e.target.files?.[0] ?? null
+                    setActivityFile(file)
+                  }}
+                />
+              </Input.Root>
+            </>
           </div>
         );
       })}

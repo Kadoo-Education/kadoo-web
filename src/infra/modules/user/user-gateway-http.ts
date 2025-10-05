@@ -1,6 +1,7 @@
 import { client, HttpClient } from "@/infra/external/http";
 import { GetUserDTO } from "./dto/get-user-dto";
-import { UserGateway } from "./user-gateway";
+import { CreateUser, UserGateway } from "./user-gateway";
+import { User } from "@/app/adm/usuario-edital/page";
 
 export class UserGatewayHttp implements UserGateway {
 
@@ -14,6 +15,24 @@ export class UserGatewayHttp implements UserGateway {
     }
 
     return result.value;
+  }
+
+  async getAll(): Promise<User[]> {
+    const result = await this.client.get<User[]>("/user")
+
+    if (result.isLeft()) {
+      throw new Error("Não foi possível encontrar os usuários.")
+    }
+
+    return result.value
+  }
+
+  async create(props: CreateUser): Promise<void> {
+    const result = await this.client.post("/user", props)
+
+    if (result.isLeft()) {
+      throw new Error("Não foi possível criei esse usuário.")
+    }
   }
 }
 

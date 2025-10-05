@@ -13,6 +13,7 @@ import { ArrowRight } from "lucide-react"
 import { motion } from "framer-motion"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
+import { useRouter } from "next/navigation"
 
 interface Edict {
   edict: {
@@ -30,6 +31,20 @@ interface Edict {
 
 export function EdictDetailsSection({ edict }: Edict) {
 
+  const { push } = useRouter()
+
+  // let edict = {
+  //   id: 1,
+  //   status: "Enviado",
+  //   title: "OLá",
+  //   description: "saidjasid",
+  //   file: "oaskdoakd",
+  //   startDate: new Date(),
+  //   organizer: "Oiasd",
+  //   endDate: new Date(),
+  //   categories: []
+  // }
+
   return (
     <div className="min-h-screen bg-white py-12 px-6 lg:px-32">
       <motion.div
@@ -45,7 +60,7 @@ export function EdictDetailsSection({ edict }: Edict) {
               Edital Aberto
             </Badge>
             <h1 className="text-4xl font-bold mt-4 text-[#5127FF]">
-              {edict.title}
+              {edict?.title}
             </h1>
 
             <div className="flex gap-2 mt-6">
@@ -59,7 +74,7 @@ export function EdictDetailsSection({ edict }: Edict) {
 
           <div className="prose max-w-none whitespace-pre-line">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {edict.description}
+              {edict?.description}
             </ReactMarkdown>
           </div>
         </div>
@@ -106,12 +121,10 @@ export function EdictDetailsSection({ edict }: Edict) {
 
             <Separator />
 
-            <Button className="w-full bg-[#F4DA02] hover:bg-[#e7cc01] text-black font-semibold transition-transform hover:scale-105">
-              Inscreva-se até {new Date(edict.endDate).toLocaleString("pt-BR", {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric'
-              })}
+            <Button className="w-full bg-[#F4DA02] hover:bg-[#e7cc01] text-black font-semibold transition-transform hover:scale-105" onClick={() => {
+              push(`/etapas-do-edital/${edict.id}`)
+            }}>
+              Seguir para Etapas
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </CardContent>

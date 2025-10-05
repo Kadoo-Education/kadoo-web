@@ -15,6 +15,7 @@ import { Card, CardContent } from "@/presentation/external/components/ui/card";
 import Link from "next/link";
 import { EdictItems } from "../edicts-items/edicts-items";
 import { edictGatewayHttp } from "@/infra/modules/edict/edict-gateway-http";
+import { EdictDTO } from "@/infra/modules/edict/dto/edict-dto";
 
 const mentores = [
   {
@@ -109,28 +110,20 @@ export const edicts = [
 export function HomeSection() {
 
   const [user, setUser] = useState<{ name: string, role: EnumProfile } | null>(null)
-  const [edicts, setEdicts] = useState<{
-    id: number
-    status: string
-    categories: string[]
-    title: string
-    description: string
-    startDate: Date
-    endDate: Date
-  }[]| null>(null)
+  const [edicts, setEdicts] = useState<EdictDTO[] | null>(null)
 
   const getUser = useCallback(async () => {
     await userGatewayHttp.get().then(setUser)
   }, [])
 
-  const getAllEdicts = useCallback(async () => {
-    await edictGatewayHttp.getAll().then(setEdicts)
+  const getAllEdictsAttachUser = useCallback(async () => {
+    await edictGatewayHttp.edictsAttachUser().then(setEdicts)
   }, [])
 
   useEffect(() => {
     getUser()
-    getAllEdicts()
-  }, [getUser, getAllEdicts])
+    getAllEdictsAttachUser()
+  }, [getUser, getAllEdictsAttachUser])
 
   // if (!user) return <Loading />
 
@@ -237,7 +230,7 @@ export function HomeSection() {
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <h2 className="text-3xl font-bold text-gray-900">Editais</h2>
-                  <p className="text-gray-600">Oportunidades abertas para acelerar seu negócio</p>
+                  <p className="text-gray-600">Editais em que você está inscrito.</p>
                 </div>
                 <Button
                   variant="outline"

@@ -20,7 +20,7 @@ export class AxiosAdapter implements HttpClient {
       // if (token) {
       //   config.headers.Authorization = `Bearer ${token}`;
       // }
-      config.headers.Authorization = `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrYWRvby1hcGkiLCJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJpZCI6MSwibmFtZSI6InBlZHJvIGhlbnJpcXVlIiwicm9sZSI6IlJPTEVfVU5LTk9XTiIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiZXhwIjoxNzU3MDA5MTE3fQ.n8NVVWJAQogkNySq84o_uHdwyj81-BUfVbRbAxEtR7M`
+      config.headers.Authorization = `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrYWRvby1hcGkiLCJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJpZCI6MSwibmFtZSI6InBlZHJvIGhlbnJpcXVlIiwicm9sZSI6IlJPTEVfVU5LTk9XTiIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiZXhwIjoxNzU5NTQ0ODUyfQ.dz6GFLlbQP6pD7UJvrVk-8F-k98mQIxwvIBbMvMyWNs`
       return config;
     });
   }
@@ -36,6 +36,7 @@ export class AxiosAdapter implements HttpClient {
       return right(data);
     } catch (error) {
       if (isAxiosError(error)) {
+        console.log(error, "IJIASDJIASJDIASJ")
         return left(new Error(error.response?.data.message));
       }
 
@@ -88,6 +89,20 @@ export class AxiosAdapter implements HttpClient {
       }
 
       return left(new Error("Ocorreu um erro interno."));
+    }
+  }
+
+  async put<Result>(url: string, body: object): Promise<Either<Error, Result>> {
+    try {
+      const { data } = await this.api.put<Result>(url, body)
+
+      return right(data)
+    } catch (error) {
+      if (isAxiosError(error)) {
+        return left(new Error(error.response?.data.message))
+      }
+
+      return left(new Error("Ocorreu um erro interno."))
     }
   }
 }

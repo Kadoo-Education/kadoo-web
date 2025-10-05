@@ -14,6 +14,6 @@ export default async function EdictDetailsPage({
   if (!edict) return notFound()
 
   return (
-    <EdictDetailsSection edict={edict}/>
+    <EdictDetailsSection edict={edict} />
   )
 }

@@ -3,49 +3,23 @@ export interface CreateEdictDTO {
   description: string
   organizer: string
   contact: string
-  startDate: Date
-  endDate: Date
-  file: string
-  categories: string[]
-  steps: CreateStepDTO[]
-}
-
-export type CreateStepDTO = EventPresencial | EventOnline | ActivityStep
-
-export interface CreateEdictDTO {
-  title: string
-  description: string
-  organizer: string
-  contact: string
   location: string
   startDate: Date
   endDate: Date
   file: string
   categories: string[]
-  steps: CreateStepDTO[]
+  steps: Step[]
 }
 
-type EventBase = {
-  format: "Evento"
+interface Step {
   title: string
   description: string
-  time: string
   date: Date
-}
-
-
-type EventPresencial = EventBase & {
-  mode: "Presencial"
+  format: "Evento" | "Atividade"
+  mode?: "Online" | "Presencial"
   address?: string
-}
-
-type EventOnline = EventBase & {
-  mode: "Online"
   meetingLink?: string
+  dueDate?: Date
+  file: string | undefined
 }
 
-type ActivityStep = {
-  format?: "Atividade"
-  dueDate?: Date | undefined
-  activityPDF?: string
-}

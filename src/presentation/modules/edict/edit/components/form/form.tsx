@@ -5,7 +5,7 @@ import { Textarea } from "@/presentation/external/components/ui/textarea"
 import { Input, Label } from "@/presentation/shared/components"
 import { Checkbox } from "@/presentation/external/components/ui/checkbox"
 import { Separator } from "@/presentation/external/components/ui/separator"
-import { FileText, Calendar, Tag, Footprints, PlusCircleIcon, Trash2, Loader2 } from "lucide-react"
+import { FileText, Calendar, Tag, Footprints, PlusCircleIcon, Trash2, Loader2, X } from "lucide-react"
 import { Controller, useFieldArray, useForm } from "react-hook-form"
 import remarkGfm from "remark-gfm"
 
@@ -21,8 +21,10 @@ import { ptBR } from "date-fns/locale"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/external/components/ui/select"
 import z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { EdictDTO } from "@/infra/modules/edict/dto/edict-dto"
+import Link from "next/link"
+import { edictGatewayHttp } from "@/infra/modules/edict/edict-gateway-http"
 
 const availableCategories = [
   "Tecnologia",
@@ -37,34 +39,17 @@ const availableCategories = [
   "Mobilidade",
 ]
 
-const schemaBaseTrails = z.object({
-  format: z.literal("Evento"),
+const stepSchema = z.object({
   title: z.string(),
   description: z.string(),
-  time: z.string(),
   date: z.date(),
-})
-
-const schemaPresencialTrail = schemaBaseTrails.extend({
-  mode: z.literal("Presencial"),
+  format: z.enum(["Evento", "Atividade"]),
+  mode: z.string().optional(),
   address: z.string().optional(),
-})
-
-const schemaOnlineTrail = schemaBaseTrails.extend({
-  mode: z.literal("Online"),
   meetingLink: z.string().optional(),
-})
-
-const eventSchema = z.discriminatedUnion("mode", [schemaPresencialTrail, schemaOnlineTrail])
-
-const schemaActivity = z.object({
-  format: z.literal("Atividade").optional(),
-  file: z.instanceof(File),
   dueDate: z.date().optional(),
+  activityFile: z.string().nullable().optional(),
 })
-
-const stepSchema = z.discriminatedUnion("format", [eventSchema, schemaActivity])
-
 
 const schema = z.object({
   title: z.string().min(1, "Título é obrigatório."),
@@ -72,17 +57,12 @@ const schema = z.object({
   organizer: z.string().min(1, "Insira o Organizador do Edital."),
   contact: z.string(),
   location: z.string(),
-  startDate: z.date({
-    error: "A data de início é obrigatória"
-  }),
-  endDate: z.date({
-    error: "A data de término é obrigatória"
-  }),
-  file: z.instanceof(File),
+  startDate: z.date(),
+  endDate: z.date(),
+  file: z.string(),
   categories: z.array(z.string()).min(1, "Pelo menos uma categoria deve ser selecionada."),
   steps: z.array(stepSchema).min(1, "Adicione pelo menos uma etapa.")
 })
-
 
 type EditEdictValidation = z.infer<typeof schema>
 
@@ -90,10 +70,11 @@ interface Step {
   id: number
   title: string
   description: string
-  time: string
   date: Date
   address: string
+  meetingLink: string
   dueDate: Date
+  mode: string
   activityFile: string
 }
 
@@ -119,8 +100,11 @@ export function Form({ edict }: FormProps) {
   const [previewMode, setPreviewMode] = useState(false)
   const [loading, setLoading] = useState(false)
 
+  const [edictFile, setEdictFile] = useState<File | null>(null)
+  const [activityFile, setActivityFile] = useState<File | null>(null)
 
-  const { register, watch, control } = useForm<EditEdictValidation>({
+
+  const { register, watch, control, handleSubmit, setValue, formState: { errors } } = useForm<EditEdictValidation>({
     resolver: zodResolver(schema),
     defaultValues: {
       title: edict.title,
@@ -128,14 +112,31 @@ export function Form({ edict }: FormProps) {
       organizer: edict.organizer,
       contact: edict.contact,
       location: edict.location,
-      startDate: edict.startDate,
-      endDate: edict.endDate,
+      startDate: new Date(edict.startDate),
+      endDate: new Date(edict.endDate),
+      file: edict.file,
       categories: edict.categories,
-      steps: edict.steps
+      steps: edict.steps.map((step) => ({
+        ...step,
+        mode: step.mode ?? "",
+        date: new Date(step.date as unknown as string),
+        dueDate: step.dueDate ? new Date(step.dueDate as unknown as string) : undefined,
+        address: step.address ?? "",
+        meetingLink: step.meetingLink ?? "",
+        activityFile: (step as any).activityFile ?? null,
+      }))
     },
 
     shouldUnregister: false,
   })
+
+  // useEffect(() => {
+  //   setEdictFile(edict?.file)
+  // }, [])
+
+  function removeEdictFile() {
+    setEdictFile(null)
+  }
 
   const { fields: steps, append, remove } = useFieldArray({
     control,
@@ -143,11 +144,27 @@ export function Form({ edict }: FormProps) {
     keyName: "fieldId"
   });
 
+  async function uploadFile<T>(file: File): Promise<T> {
+    const formData = new FormData();
+    formData.set("file", file);
+
+    const response = await fetch(`/api/upload-file`, {
+      method: "POST",
+      body: formData,
+    })
+
+    if (!response.ok) {
+      throw new Error(`Erro ao enviar`);
+    }
+
+    const data: T = await response.json();
+    return data
+  }
+
   function handleIncreaseStep() {
     append({
       title: "",
       description: "",
-      time: "",
       date: new Date(),
     })
   }
@@ -156,6 +173,53 @@ export function Form({ edict }: FormProps) {
     remove(index)
   }
 
+  console.log(errors)
+
+  async function handleUpdateEdictForm(data: EditEdictValidation) {
+
+    let edictUrl = "";
+    let activityUrl: (string | undefined)[]
+
+    if (edictFile) {
+
+      const { url: edictPdf } = await uploadFile<{ url: string; error: boolean }>(edictFile);
+
+      edictUrl = edictPdf;
+    }
+
+
+    if (activityFile) {
+      const stepUploads = await Promise.all(
+        data.steps.map(async (s) => {
+          if (s.format === "Atividade" && activityFile) {
+            const { url } = await uploadFile<{ url: string; error: boolean }>(activityFile);
+            return url;
+          }
+          return undefined;
+        })
+      );
+
+      activityUrl = stepUploads
+    }
+
+
+
+    try {
+      await edictGatewayHttp.update({
+        id: edict.id,
+        ...data,
+        startDate: new Date(data.startDate),
+        endDate: new Date(data.endDate),
+        file: edictFile ? edictUrl : edict.file,
+        steps: data.steps.map((step, i) => ({
+          ...step,
+          file: activityFile ? activityUrl[i] : activityFile
+        }))
+      })
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   const startDate = watch("startDate")
   const endEdictDate = watch("endDate")
@@ -163,7 +227,7 @@ export function Form({ edict }: FormProps) {
 
 
   return (
-    <form className="space-y-8" encType="multipart/form-data">
+    <form className="space-y-8" onSubmit={handleSubmit(handleUpdateEdictForm)} encType="multipart/form-data">
       <div className="space-y-6">
         <div className="flex items-center gap-2 mb-4">
           <FileText className="w-5 h-5 text-[#5127FF]" />
@@ -373,12 +437,28 @@ export function Form({ edict }: FormProps) {
           <Input.Label className="text-sm font-medium text-gray-700 block">Arquivo PDF do edital
           </Input.Label>
 
-          <Input.Core
-            type="file"
-            accept="application/pdf"
-            className="w-full"
-            {...register("file")}
-          />
+          {edict.file ? (
+            <div className="w-full flex justify-between">
+              <Link href={edict.file} target="_blank" className="underline">
+                Ver arquivo
+              </Link>
+              <X
+                role="button"
+                className="cursor-pointer"
+                onClick={removeEdictFile}
+              />
+            </div>
+          ) : (
+            <Input.Core
+              type="file"
+              accept="application/pdf"
+              className="w-full"
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                const file = e.target.files?.[0] ?? null
+                setEdictFile(file)
+              }}
+            />
+          )}
         </Input.Root>
       </div>
 
@@ -433,7 +513,6 @@ export function Form({ edict }: FormProps) {
 
       {steps.map((step, index) => {
         const eventFormat = watch(`steps.${index}.format`);
-        const mode = watch(`steps.${index}.mode`);
 
         const date = watch(`steps.${index}.date`)
 
@@ -478,14 +557,6 @@ export function Form({ edict }: FormProps) {
                 placeholder="Digite a descrição da Etapa"
                 {...register(`steps.${index}.description`)}
                 className="max-w-full resize-none"
-              />
-            </Input.Root>
-
-            <Input.Root>
-              <Input.Label>Horário *</Input.Label>
-              <Input.Core
-                type="time"
-                {...register(`steps.${index}.time`)}
               />
             </Input.Root>
 
@@ -544,105 +615,116 @@ export function Form({ edict }: FormProps) {
               </Input.Root>
             </div>
 
-            {eventFormat === "Evento" && (
-              <>
+            <>
 
-                <div>
-                  <Input.Label htmlFor={`steps.${index}.mode`}>Modalidade do Evento</Input.Label>
-                  <Controller
-                    control={control}
-                    name={`steps.${index}.mode`}
-                    render={({ field: { onChange, onBlur, value } }) => (
-                      <Select onValueChange={onChange} defaultValue={value}>
-                        <SelectTrigger className="w-full mt-2" onBlur={onBlur}>
-                          <SelectValue placeholder="Selecione uma modalidade" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Presencial">Presencial</SelectItem>
-                          <SelectItem value="Online">Online</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
-                </div>
+              <div>
+                <Input.Label htmlFor={`steps.${index}.mode`}>Modalidade do Evento</Input.Label>
+                <Controller
+                  control={control}
+                  name={`steps.${index}.mode`}
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <Select onValueChange={onChange} value={value}>
+                      <SelectTrigger className="w-full mt-2" onBlur={onBlur}>
+                        <SelectValue placeholder="Selecione uma modalidade" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Presencial">Presencial</SelectItem>
+                        <SelectItem value="Online">Online</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+              </div>
 
-                {mode === "Presencial" && (
-                  <Input.Root>
-                    <Input.Label htmlFor={`steps.${index}.address`}>Endereço</Input.Label>
-                    <Input.Core
-                      id={`steps.${index}.address`}
-                      placeholder="Informe o endereço do Evento"
-                      {...register(`steps.${index}.address`)}
-                      className="w-full"
+              <Input.Root>
+                <Input.Label htmlFor={`steps.${index}.address`}>Endereço</Input.Label>
+                <Input.Core
+                  id={`steps.${index}.address`}
+                  placeholder="Informe o endereço do Evento"
+                  {...register(`steps.${index}.address`)}
+                  className="w-full"
+                />
+              </Input.Root>
+
+              <Input.Root>
+                <Input.Label htmlFor={`steps.${index}.meetingLink`}>Link da Reunião</Input.Label>
+                <Input.Core
+                  id={`steps.${index}.meetingLink`}
+                  placeholder="Informe o link da reunião"
+                  {...register(`steps.${index}.meetingLink`)}
+                  className="w-full"
+                />
+              </Input.Root>
+            </>
+
+            <>
+              <Input.Root>
+                <Input.Label htmlFor="startDate" className="text-sm font-medium text-gray-700 block">
+                  Data de Entrega *
+                </Input.Label>
+
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button disabled={!startDate} variant="outline" className={cn(
+                      "w-[240px] pl-3 text-left font-normal",
+                      !dueDateActivity && "text-muted-foreground"
+                    )}>
+                      <span className="text-left w-full">{dueDateActivity ? (
+                        format(dueDateActivity, "PPP", { locale: ptBR })
+                      ) : (
+                        "Selecione uma data"
+                      )}</span>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent>
+                    <Controller
+                      control={control}
+                      name={`steps.${index}.dueDate`}
+                      render={({ field: { onChange, onBlur } }) => (
+                        <CalendarShad
+                          mode="single"
+                          selected={dueDateActivity}
+                          onDayBlur={onBlur}
+                          onSelect={onChange}
+                          locale={ptBR}
+                          captionLayout="dropdown"
+                        />
+                      )}
                     />
-                  </Input.Root>
-                )}
 
-                {mode === "Online" && (
-                  <Input.Root>
-                    <Input.Label htmlFor={`steps.${index}.meetingLink`}>Link da Reunião</Input.Label>
-                    <Input.Core
-                      id={`steps.${index}.meetingLink`}
-                      placeholder="Informe o link da reunião"
-                      {...register(`steps.${index}.meetingLink`)}
-                      className="w-full"
+                  </PopoverContent>
+                </Popover>
+              </Input.Root>
+
+              <Input.Root>
+                <Input.Label>PDF da Atividade</Input.Label>
+
+
+                {step.activityFile ? (
+
+                  <div className="flex justify-between">
+                    <Link href={String(step.activityFile)} target="_blank" className="underline">
+                      Ver arquivo
+                    </Link>
+                    <X
+                      role="button"
+                      className="cursor-pointer"
+                      onClick={() => setValue(`steps.${index}.activityFile`, null)}
                     />
-                  </Input.Root>
-                )}
-              </>
-            )}
-
-            {eventFormat === "Atividade" && (
-              <>
-                <Input.Root>
-                  <Input.Label htmlFor="startDate" className="text-sm font-medium text-gray-700 block">
-                    Data de Entrega *
-                  </Input.Label>
-
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button disabled={!startDate} variant="outline" className={cn(
-                        "w-[240px] pl-3 text-left font-normal",
-                        !dueDateActivity && "text-muted-foreground"
-                      )}>
-                        <span className="text-left w-full">{dueDateActivity ? (
-                          format(dueDateActivity, "PPP", { locale: ptBR })
-                        ) : (
-                          "Selecione uma data"
-                        )}</span>
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent>
-                      <Controller
-                        control={control}
-                        name={`steps.${index}.dueDate`}
-                        render={({ field: { onChange, onBlur } }) => (
-                          <CalendarShad
-                            mode="single"
-                            selected={dueDateActivity}
-                            onDayBlur={onBlur}
-                            onSelect={onChange}
-                            locale={ptBR}
-                            captionLayout="dropdown"
-                          />
-                        )}
-                      />
-
-                    </PopoverContent>
-                  </Popover>
-                </Input.Root>
-
-                <Input.Root>
-                  <Input.Label>PDF da Atividade</Input.Label>
+                  </div>
+                ) : (
                   <Input.Core
                     type="file"
                     accept="application/pdf"
                     className="w-full"
-                    {...register(`steps.${index}.file`)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      const file = e.target.files?.[0] ?? null
+                      setActivityFile(file)
+                    }}
                   />
-                </Input.Root>
-              </>
-            )}
+                )}
+              </Input.Root>
+            </>
           </div>
         );
       })}
@@ -661,7 +743,7 @@ export function Form({ edict }: FormProps) {
           className="bg-[#F4DA02] text-black hover:bg-[#F4DA02]/90 font-semibold px-8 py-3 h-auto"
         >
           {loading && <Loader2 className="h-5 w-5 animate-spin" />}
-          {loading ? "Publicando..." : "Publicar Edital"}
+          {loading ? "Atualizando..." : "Atualizar Edital"}
         </Button>
 
         <Button type="reset" variant="ghost" className="text-gray-600 hover:text-gray-800 px-8 py-3 h-auto">
