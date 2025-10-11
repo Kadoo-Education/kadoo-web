@@ -5,9 +5,13 @@ import { CreateUserEdictDTO } from "./dto/create-user-edict-dto";
 export class UserEdictGatewayHttp implements UserEdictGateway {
 
   constructor(private readonly client: HttpClient) { }
-  
+
   async create({ edictId, userId }: CreateUserEdictDTO): Promise<void> {
-    await this.client.post("/user-edicts", { edictId, userId });
+    const result = await this.client.post("/user-edict", { edictId, userId });
+
+    if (result.isLeft()) {
+      throw new Error("Usuário já está cadastrado nesse edital.")
+    }
   }
 }
 

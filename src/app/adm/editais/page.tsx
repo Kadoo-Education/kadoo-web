@@ -117,7 +117,7 @@ export default function AdminEdictsPage() {
 
   function handleDelete(id: number) {
 
-    
+
     // if (confirm("Deseja excluir este edital?")) {
     //   setItems(prev => prev.filter(e => e.id !== id))
     // }
@@ -183,9 +183,9 @@ export default function AdminEdictsPage() {
             <TableHeader>
               <TableRow className="bg-gray-50">
                 <TableHead>Título</TableHead>
-                {/* <TableHead>Categoria</TableHead> */}
                 <TableHead>Período</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Gerenciar Etapas</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -193,7 +193,6 @@ export default function AdminEdictsPage() {
               {edicts?.map((e) => (
                 <TableRow key={e.id} className="hover:bg-gray-50">
                   <TableCell className="font-medium">{e.title}</TableCell>
-                  {/* <TableCell>{e.category}</TableCell> */}
                   <TableCell>
                     <span className="text-sm text-gray-700">{new Date(e.startDate).toLocaleDateString()}</span>
                     <span className="mx-1 text-gray-400">até</span>
@@ -203,6 +202,11 @@ export default function AdminEdictsPage() {
                     <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusColorMap[e.status]}`}>
                       {e.status}
                     </span>
+                  </TableCell>
+                  <TableCell>
+                    <Link href={""} className={`px-2 py-1 rounded-full text-xs font-semibold ${statusColorMap[e.status]}`}>
+                      Gerenciar etapas
+                    </Link>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
@@ -216,6 +220,7 @@ export default function AdminEdictsPage() {
                           <Trash2 className="w-4 h-4 mr-1" /> Excluir
                         </Button>
                       </DialogTrigger>
+
                       <DialogContent className="sm:max-w-[400px]">
                         <DialogHeader>
                           <DialogTitle>Deletar edital</DialogTitle>

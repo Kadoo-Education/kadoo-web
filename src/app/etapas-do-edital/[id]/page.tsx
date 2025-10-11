@@ -1,7 +1,7 @@
 
 
 import { stepGatewayHttp } from "@/infra/modules/step/step-gateway-http"
-import { StepsOfEdict } from "@/presentation/modules/steps/view/components/steps-edicts-section"
+import { StepsSection } from "@/presentation/modules/steps/view/components/steps-section"
 
 async function getStepsByEdictId(edictId: number) {
   const steps = await stepGatewayHttp.getByEdictId(edictId)
@@ -14,8 +14,6 @@ export default async function StepsEdictPage({ params }: { params: { id: string 
 
   const steps = await getStepsByEdictId(Number(id))
 
-  console.log(steps)
-
   return (
     <div className="min-h-screen bg-white py-12 px-6 lg:px-32">
       <div className="mb-10">
@@ -25,7 +23,7 @@ export default async function StepsEdictPage({ params }: { params: { id: string 
         </p>
       </div>
 
-      <StepsOfEdict />
+      <StepsSection steps={steps} />
     </div>
   )
 }

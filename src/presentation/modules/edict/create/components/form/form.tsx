@@ -26,6 +26,16 @@ import { ptBR } from "date-fns/locale"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/external/components/ui/select"
 import { edictGatewayHttp } from "@/infra/modules/edict/edict-gateway-http"
 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/presentation/external/components/ui/dialog"
+import { Link2, MapPin, Clock3 } from "lucide-react"
+
 const availableCategories = [
   "Tecnologia",
   "Impacto Social",
@@ -39,7 +49,28 @@ const availableCategories = [
   "Mobilidade",
 ]
 
+
+
+export async function uploadFile<T>(file: File): Promise<T> {
+  const formData = new FormData();
+  formData.set("file", file);
+
+  const response = await fetch(`/api/upload-file`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Erro ao enviar`);
+  }
+
+  const data: T = await response.json();
+  return data
+}
+
 export function Form() {
+  const [eventOpen, setEventOpen] = useState(false)
+  const [activityOpen, setActivityOpen] = useState(false)
   const [previewMode, setPreviewMode] = useState(false)
   const [loading, setLoading] = useState(false)
   const [edictFile, setEdictFile] = useState<File | null>(null)
@@ -59,23 +90,6 @@ export function Form() {
     control,
     name: "steps"
   });
-
-  async function uploadFile<T>(file: File): Promise<T> {
-    const formData = new FormData();
-    formData.set("file", file);
-
-    const response = await fetch(`/api/upload-file`, {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!response.ok) {
-      throw new Error(`Erro ao enviar`);
-    }
-
-    const data: T = await response.json();
-    return data
-  }
 
   console.log(errors)
 
@@ -410,6 +424,165 @@ export function Form() {
 
       <div className="flex items-center gap-2 mb-4">
         <Footprints className="w-5 h-5 text-[#5127FF]" />
+        <h2 className="text-xl font-semibold text-gray-900">Etapas do Edital</h2>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-3">
+        <Button type="button" className="bg-[#5127FF] hover:bg-[#5127FF]/90" onClick={() => setEventOpen(true)}>
+          <PlusCircleIcon className="mr-2 h-5 w-5" />
+          Adicionar Evento
+        </Button>
+        <Button type="button" variant="outline" className="border-[#5127FF]" onClick={() => setActivityOpen(true)}>
+          <PlusCircleIcon className="mr-2 h-5 w-5" />
+          Adicionar Atividade
+        </Button>
+      </div>
+
+      <div className="mt-4">
+        <div className="text-center text-sm text-gray-600 p-6 border border-dashed rounded-lg">
+          Nenhuma etapa adicionada ainda.
+          <div className="mt-2">Use os botões acima para criar Evento ou Atividade.</div>
+        </div>
+      </div>
+
+      <Dialog open={eventOpen} onOpenChange={setEventOpen}>
+        <DialogContent className="sm:max-w-[560px]">
+          <DialogHeader>
+            <DialogTitle>Novo Evento</DialogTitle>
+            <DialogDescription>Preencha os campos para adicionar um evento.</DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-2">
+            <label className="grid gap-1">
+              <span className="text-sm font-medium">Título *</span>
+              <Input.Core placeholder="Ex: Workshop de Pitch" />
+            </label>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <label className="grid gap-1">
+                <span className="text-sm font-medium">Data *</span>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className={cn("w-full justify-start")}>
+                      <Calendar className="mr-2 h-4 w-4" />
+                      Selecionar
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="start" className="p-0">
+                    <CalendarShad mode="single" captionLayout="dropdown" locale={ptBR} />
+                  </PopoverContent>
+                </Popover>
+              </label>
+
+              <label className="grid gap-1">
+                <span className="text-sm font-medium">Modalidade *</span>
+                <Select>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Presencial">Presencial</SelectItem>
+                    <SelectItem value="Online">Online</SelectItem>
+                  </SelectContent>
+                </Select>
+              </label>
+            </div>
+
+            <label className="grid gap-1">
+              <span className="text-sm font-medium">Endereço (se presencial)</span>
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-gray-400" />
+                <Input.Core placeholder="Rua, número, bairro, cidade" />
+              </div>
+            </label>
+
+            <label className="grid gap-1">
+              <span className="text-sm font-medium">Link da reunião (se online)</span>
+              <div className="flex items-center gap-2">
+                <Link2 className="h-4 w-4 text-gray-400" />
+                <Input.Core placeholder="https://..." />
+              </div>
+            </label>
+
+            <label className="grid gap-1">
+              <span className="text-sm font-medium">Descrição *</span>
+              <Textarea rows={4} placeholder="Detalhes do evento" />
+            </label>
+          </div>
+
+          <DialogFooter>
+            <Button className="bg-[#5127FF] hover:bg-[#5127FF]/90" type="button">Adicionar Evento</Button>
+            <Button variant="ghost" type="button" onClick={() => setEventOpen(false)}>Cancelar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal: Criar Atividade (UI) */}
+      <Dialog open={activityOpen} onOpenChange={setActivityOpen}>
+        <DialogContent className="sm:max-w-[560px]">
+          <DialogHeader>
+            <DialogTitle>Nova Atividade</DialogTitle>
+            <DialogDescription>Preencha os campos para adicionar uma atividade.</DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-2">
+            <label className="grid gap-1">
+              <span className="text-sm font-medium">Título *</span>
+              <Input.Core placeholder="Ex: Entrega do Canvas" />
+            </label>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <label className="grid gap-1">
+                <span className="text-sm font-medium">Data *</span>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className={cn("w-full justify-start")}>
+                      <Calendar className="mr-2 h-4 w-4" />
+                      Selecionar
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="start" className="p-0">
+                    <CalendarShad mode="single" captionLayout="dropdown" locale={ptBR} />
+                  </PopoverContent>
+                </Popover>
+              </label>
+
+              <label className="grid gap-1">
+                <span className="text-sm font-medium">Entrega *</span>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className={cn("w-full justify-start")}>
+                      <Clock3 className="mr-2 h-4 w-4" />
+                      Selecionar
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="start" className="p-0">
+                    <CalendarShad mode="single" captionLayout="dropdown" locale={ptBR} />
+                  </PopoverContent>
+                </Popover>
+              </label>
+            </div>
+
+            <label className="grid gap-1">
+              <span className="text-sm font-medium">Anexo (PDF)</span>
+              <Input.Core type="file" accept="application/pdf" />
+            </label>
+
+            <label className="grid gap-1">
+              <span className="text-sm font-medium">Descrição *</span>
+              <Textarea rows={4} placeholder="Detalhes da atividade" />
+            </label>
+          </div>
+
+          <DialogFooter>
+            <Button className="bg-[#5127FF] hover:bg-[#5127FF]/90" type="button">Adicionar Atividade</Button>
+            <Button variant="ghost" type="button" onClick={() => setActivityOpen(false)}>Cancelar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* <div className="flex items-center gap-2 mb-4">
+        <Footprints className="w-5 h-5 text-[#5127FF]" />
         <h2 className="text-xl font-semibold text-gray-900">Crie aqui as etapas do Edital</h2>
       </div>
 
@@ -619,7 +792,7 @@ export function Form() {
           <PlusCircleIcon />
           <span>Adicionar etapa</span>
         </button>
-      </div>
+      </div> */}
 
 
       <div className="flex flex-col sm:flex-row gap-4 pt-6">

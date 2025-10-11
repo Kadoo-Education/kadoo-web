@@ -351,7 +351,7 @@ export default function AdminPage() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {edicts?.map((edict) => (
+                  {edicts?.length ? (edicts?.map((edict) => (
                     <Link key={edict.id} href={`/edital/${edict.id}`} className="group">
                       <Card className="relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-white">
 
@@ -386,7 +386,7 @@ export default function AdminPage() {
                         </CardContent>
                       </Card>
                     </Link>
-                  ))}
+                  ))) : <span>Nenhum edital cadastrado</span>}
                 </div>
               </section>
               {/* <h2 className="text-xl font-semibold">Gerenciamento de Editais</h2> */}

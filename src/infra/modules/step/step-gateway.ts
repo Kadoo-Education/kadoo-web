@@ -5,6 +5,10 @@ export interface Step {
   date: Date
   status: string
   event: Event
+  activity?: {
+    dueDate: Date
+    file: string
+  }
 }
 
 interface Event {
@@ -18,4 +22,5 @@ interface Event {
 
 export interface StepGateway {
   getByEdictId(edictId: number): Promise<Step[]> 
+  getById(stepId: number): Promise<Step>
 }
