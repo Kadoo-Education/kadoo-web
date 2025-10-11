@@ -517,7 +517,6 @@ export function Form() {
         </DialogContent>
       </Dialog>
 
-      {/* Modal: Criar Atividade (UI) */}
       <Dialog open={activityOpen} onOpenChange={setActivityOpen}>
         <DialogContent className="sm:max-w-[560px]">
           <DialogHeader>

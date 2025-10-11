@@ -1,14 +1,13 @@
 import { client, HttpClient } from "@/infra/external/http";
-import { Step, StepGateway } from "./step-gateway";
+import { CreateOnlineStepProps, CreateStepProps, Step, StepGateway } from "./step-gateway";
 
 export class StepGatewayHttp implements StepGateway {
-  constructor(private readonly client: HttpClient) {}
-  
-  
+  constructor(private readonly client: HttpClient) { }
+
   async getByEdictId(edictId: number): Promise<Step[]> {
     const result = await this.client.get<Step[]>(`/steps/edict/${edictId}`)
 
-    if(result.isLeft()) {
+    if (result.isLeft()) {
       throw new Error("Etapas não encontradas.")
     }
 
@@ -18,11 +17,19 @@ export class StepGatewayHttp implements StepGateway {
   async getById(stepId: number): Promise<Step> {
     const result = await this.client.get<Step>(`/steps/${stepId}`)
 
-    if(result.isLeft()){
+    if (result.isLeft()) {
       throw new Error("Etapa não encontrada.")
     }
 
     return result.value
+  }
+
+  async createInPerson(props: CreateStepProps): Promise<void> {
+    await this.client.post("/event/in-person", props)
+  }
+
+  async createOnline(props: CreateOnlineStepProps): Promise<void> {
+    await this.client.post("/event/online", props)
   }
 }
 

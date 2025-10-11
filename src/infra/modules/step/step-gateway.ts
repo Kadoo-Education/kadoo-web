@@ -20,7 +20,29 @@ interface Event {
   address: string
 }
 
+export interface CreateStepProps {
+  title: string
+  description: string
+  date: Date
+  address: string
+  mode: string
+  format: string
+  edictId: number
+}
+
+export interface CreateOnlineStepProps {
+  title: string
+  description: string
+  date: Date
+  meetingLink: string
+  mode: string
+  format: string
+  edictId: number
+}
+
 export interface StepGateway {
   getByEdictId(edictId: number): Promise<Step[]> 
   getById(stepId: number): Promise<Step>
+  createInPerson(props: CreateStepProps): Promise<void>
+  createOnline(props: CreateOnlineStepProps): Promise<void>
 }

@@ -10,6 +10,7 @@ import { CreateInPersonEventDialog } from "@/presentation/modules/step-by-id/com
 import { CreateOnlineEventDialog } from "@/presentation/modules/step-by-id/components/create/create-online-event-dialog"
 import { CreateActivityDialog } from "@/presentation/modules/step-by-id/components/create/create-activity-dialog"
 import { stepGatewayHttp } from "@/infra/modules/step/step-gateway-http"
+import { createInPersonStepAction } from "./(actions)/create-in-person-step-action"
 
 type PageProps = {
   params: Promise<{ id: string }>
@@ -84,14 +85,14 @@ export default async function EdictByIdPage({ params }: PageProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-col sm:flex-row gap-3">
-              <CreateInPersonEventDialog>
+              <CreateInPersonEventDialog edictId={Number(id)} onCreateStepAction={createInPersonStepAction}>
                 <Button className="bg-[#5127FF] hover:bg-[#5127FF]/90">
                   <PlusCircle className="mr-2 h-5 w-5" />
                   Evento Presencial
                 </Button>
               </CreateInPersonEventDialog>
 
-              <CreateOnlineEventDialog>
+              <CreateOnlineEventDialog edictId={Number(id)}>
                 <Button className="bg-[#5127FF] hover:bg-[#5127FF]/90">
                   <PlusCircle className="mr-2 h-5 w-5" />
                   Evento Online
