@@ -2,7 +2,7 @@
 import { useState } from "react"
 import { Card, CardContent } from "@/presentation/external/components/ui/card"
 import { Badge } from "@/presentation/external/components/ui/badge"
-import { ArrowRight, CheckCircle, Clock3, Circle, ChevronDown } from "lucide-react"
+import { ArrowRight, ChevronDown } from "lucide-react"
 import { AnimatePresence, motion } from "framer-motion"
 import Link from "next/link"
 import { Step } from "@/infra/modules/step/step-gateway"
@@ -13,8 +13,6 @@ interface StepsSectionProps {
 
 export function StepsSection({ steps }: StepsSectionProps) {
   const [openId, setOpenId] = useState<string | number | null>(null)
-
-  console.log(steps)
 
   return (
     <div className="space-y-6 relative">
@@ -87,8 +85,10 @@ export function StepsSection({ steps }: StepsSectionProps) {
 
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-500 capitalize">
-                      {step?.event?.type}{" "}
-                      {"date" in step && step.date ? `• ${step.date}` : ""}
+                      {step.kind === "activity" ? "Atividade" : "Evento"}{" "}
+                      {"date" in step && step.date ? `• ${new Date(step.date).toLocaleDateString("pt-BR", {
+                        
+                      })}` : ""}
                     </span>
 
                     <Link

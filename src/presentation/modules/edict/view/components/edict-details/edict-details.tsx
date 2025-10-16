@@ -30,23 +30,10 @@ interface Edict {
 }
 
 export function EdictDetailsSection({ edict }: Edict) {
-
   const { push } = useRouter()
 
-  // let edict = {
-  //   id: 1,
-  //   status: "Enviado",
-  //   title: "OLá",
-  //   description: "saidjasid",
-  //   file: "oaskdoakd",
-  //   startDate: new Date(),
-  //   organizer: "Oiasd",
-  //   endDate: new Date(),
-  //   categories: []
-  // }
-
   return (
-    <div className="min-h-screen bg-white py-12 px-6 lg:px-32">
+    <div className="min-h-screen bg-white py-12 px-6">
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}

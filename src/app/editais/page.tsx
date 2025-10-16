@@ -23,7 +23,7 @@ const editaisData = [
     icon: "🚀",
     startDate: "2025-07-17",
     endDate: "2025-12-15",
-    location: "São Paulo, SP",  
+    location: "São Paulo, SP",
     participants: 150,
     investment: "R$ 500k",
     duration: "6 meses",
@@ -158,11 +158,11 @@ export default function EditaisPage() {
 
   const filteredEditais = editaisData.filter(edital => {
     const matchesSearch = edital.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         edital.description.toLowerCase().includes(searchTerm.toLowerCase());
+      edital.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === "Todos" || edital.category === selectedCategory;
     const matchesStatus = selectedStatus === "Todos" || edital.status === selectedStatus;
     const matchesDifficulty = selectedDifficulty === "Todos" || edital.difficulty === selectedDifficulty;
-    
+
     return matchesSearch && matchesCategory && matchesStatus && matchesDifficulty;
   });
 
@@ -208,256 +208,252 @@ export default function EditaisPage() {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <SidebarProvider>
-        <HomeSideBar role={role} />
-        <SidebarInset>
-          <Header profile={<Profile {...user} />}/>
+      {/* <HomeSideBar role={role} /> */}
+      {/* <Header profile={<Profile {...user} />}/> */}
 
-          <main className="p-6 space-y-8">
-            <Card className="bg-gradient-to-r from-[#5127FF] to-[#5127FF]/80 text-white border-0 shadow-xl">
-              <CardContent className="p-8">
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                  <div className="space-y-4">
-                    <h1 className="text-4xl font-bold">Editais Disponíveis</h1>
-                    <p className="text-xl text-white/90">Encontre a oportunidade perfeita para acelerar seu negócio</p>
-                    <div className="flex items-center gap-4 text-white/80">
-                      <div className="flex items-center gap-2">
-                        <TrendingUp className="w-5 h-5" />
-                        <span>{editaisData.filter(e => e.status === 'aberto').length} editais abertos</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Users className="w-5 h-5" />
-                        <span>{editaisData.reduce((acc, e) => acc + e.participants, 0)}+ vagas</span>
-                      </div>
-                    </div>
+      <div className="p-6">
+        <Card className="bg-gradient-to-r from-[#5127FF] to-[#5127FF]/80 text-white border-0 shadow-xl">
+          <CardContent className="p-8">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+              <div className="space-y-4">
+                <h1 className="text-4xl font-bold">Editais Disponíveis</h1>
+                <p className="text-xl text-white/90">Encontre a oportunidade perfeita para acelerar seu negócio</p>
+                <div className="flex items-center gap-4 text-white/80">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5" />
+                    <span>{editaisData.filter(e => e.status === 'aberto').length} editais abertos</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Users className="w-5 h-5" />
+                    <span>{editaisData.reduce((acc, e) => acc + e.participants, 0)}+ vagas</span>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-            <Card className="border-0 shadow-md">
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  {/* Search Bar */}
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <Input
-                      type="text"
-                      placeholder="Pesquisar editais por título ou descrição..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 pr-4 py-3 w-full border-2 border-gray-200 rounded-xl focus:border-[#5127FF] focus:ring-0 text-base"
-                    />
-                  </div>
+        <Card className="border-0 shadow-md">
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              {/* Search Bar */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Input
+                  type="text"
+                  placeholder="Pesquisar editais por título ou descrição..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 pr-4 py-3 w-full border-2 border-gray-200 rounded-xl focus:border-[#5127FF] focus:ring-0 text-base"
+                />
+              </div>
 
-                  {/* Filter Toggle */}
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-600">
-                      {filteredEditais.length} {filteredEditais.length === 1 ? 'edital encontrado' : 'editais encontrados'}
-                    </div>
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowFilters(!showFilters)}
-                      className="border-2 border-gray-300 hover:border-[#5127FF] hover:text-[#5127FF] transition-all duration-300"
+              {/* Filter Toggle */}
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-600">
+                  {filteredEditais.length} {filteredEditais.length === 1 ? 'edital encontrado' : 'editais encontrados'}
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="border-2 border-gray-300 hover:border-[#5127FF] hover:text-[#5127FF] transition-all duration-300"
+                >
+                  <Filter className="w-4 h-4 mr-2" />
+                  Filtros
+                  <ChevronDown className={`w-4 h-4 ml-2 transform transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+                </Button>
+              </div>
+
+              {/* Filters */}
+              {showFilters && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-xl">
+                  {/* Category Filter */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">Categoria</label>
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => setSelectedCategory(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded-lg focus:border-[#5127FF] focus:ring-0"
                     >
-                      <Filter className="w-4 h-4 mr-2" />
-                      Filtros
-                      <ChevronDown className={`w-4 h-4 ml-2 transform transition-transform ${showFilters ? 'rotate-180' : ''}`} />
-                    </Button>
+                      {categories.map(category => (
+                        <option key={category} value={category}>{category}</option>
+                      ))}
+                    </select>
                   </div>
 
-                  {/* Filters */}
-                  {showFilters && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-xl">
-                      {/* Category Filter */}
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Categoria</label>
-                        <select
-                          value={selectedCategory}
-                          onChange={(e) => setSelectedCategory(e.target.value)}
-                          className="w-full p-2 border border-gray-300 rounded-lg focus:border-[#5127FF] focus:ring-0"
-                        >
-                          {categories.map(category => (
-                            <option key={category} value={category}>{category}</option>
-                          ))}
-                        </select>
-                      </div>
+                  {/* Status Filter */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">Status</label>
+                    <select
+                      value={selectedStatus}
+                      onChange={(e) => setSelectedStatus(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded-lg focus:border-[#5127FF] focus:ring-0"
+                    >
+                      {statusOptions.map(status => (
+                        <option key={status} value={status}>
+                          {status === 'Todos' ? status : status.charAt(0).toUpperCase() + status.slice(1)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-                      {/* Status Filter */}
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Status</label>
-                        <select
-                          value={selectedStatus}
-                          onChange={(e) => setSelectedStatus(e.target.value)}
-                          className="w-full p-2 border border-gray-300 rounded-lg focus:border-[#5127FF] focus:ring-0"
-                        >
-                          {statusOptions.map(status => (
-                            <option key={status} value={status}>
-                              {status === 'Todos' ? status : status.charAt(0).toUpperCase() + status.slice(1)}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                  {/* Difficulty Filter */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">Dificuldade</label>
+                    <select
+                      value={selectedDifficulty}
+                      onChange={(e) => setSelectedDifficulty(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded-lg focus:border-[#5127FF] focus:ring-0"
+                    >
+                      {difficultyOptions.map(difficulty => (
+                        <option key={difficulty} value={difficulty}>{difficulty}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
-                      {/* Difficulty Filter */}
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Dificuldade</label>
-                        <select
-                          value={selectedDifficulty}
-                          onChange={(e) => setSelectedDifficulty(e.target.value)}
-                          className="w-full p-2 border border-gray-300 rounded-lg focus:border-[#5127FF] focus:ring-0"
-                        >
-                          {difficultyOptions.map(difficulty => (
-                            <option key={difficulty} value={difficulty}>{difficulty}</option>
-                          ))}
-                        </select>
+        {/* Editais Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredEditais.map((edital) => (
+            <Card key={edital.id} className="group relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 bg-white">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#5127FF]/5 to-[#F4DA02]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+              {/* Badge de Status */}
+              <div className="absolute top-4 right-4 z-10">
+                {getStatusBadge(edital.status)}
+              </div>
+
+              <CardContent className="p-6 relative z-10">
+                <div className="space-y-4">
+                  {/* Ícone e Tag */}
+                  <div className="flex items-start justify-between">
+                    <div className="w-12 h-12 bg-gradient-to-r from-[#5127FF] to-[#5127FF]/80 rounded-xl flex items-center justify-center shadow-lg">
+                      <span className="text-white font-bold text-lg">{edital.icon}</span>
+                    </div>
+                    <div className={`text-xs font-medium px-2 py-1 rounded-full ${getCategoryColor(edital.category)}`}>
+                      {edital.category}
+                    </div>
+                  </div>
+
+                  {/* Título e Descrição */}
+                  <div className="space-y-2">
+                    <h3 className="font-bold text-xl text-gray-900 group-hover:text-[#5127FF] transition-colors duration-300 line-clamp-2">
+                      {edital.title}
+                    </h3>
+                    <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
+                      {edital.description}
+                    </p>
+                  </div>
+
+                  {/* Info Cards */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-gray-50 p-2 rounded-lg group-hover:bg-white group-hover:shadow-sm transition-all duration-300">
+                      <div className="flex items-center gap-1 text-xs text-gray-600">
+                        <MapPin className="w-3 h-3" />
+                        <span>{edital.location}</span>
                       </div>
+                    </div>
+                    <div className="bg-gray-50 p-2 rounded-lg group-hover:bg-white group-hover:shadow-sm transition-all duration-300">
+                      <div className="flex items-center gap-1 text-xs text-gray-600">
+                        <Clock className="w-3 h-3" />
+                        <span>{edital.duration}</span>
+                      </div>
+                    </div>
+                    <div className="bg-gray-50 p-2 rounded-lg group-hover:bg-white group-hover:shadow-sm transition-all duration-300">
+                      <div className="flex items-center gap-1 text-xs text-gray-600">
+                        <Users className="w-3 h-3" />
+                        <span>{edital.participants} vagas</span>
+                      </div>
+                    </div>
+                    <div className="bg-gray-50 p-2 rounded-lg group-hover:bg-white group-hover:shadow-sm transition-all duration-300">
+                      <div className="flex items-center gap-1 text-xs font-medium">
+                        <Star className="w-3 h-3" />
+                        <span className={getDifficultyColor(edital.difficulty)}>{edital.difficulty}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Investment */}
+                  <div className="p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-xl">
+                    <div className="text-center">
+                      <p className="text-xs text-green-700 font-medium">Investimento até</p>
+                      <p className="text-lg font-bold text-green-800">{edital.investment}</p>
+                    </div>
+                  </div>
+
+                  {/* Datas */}
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl group-hover:bg-white group-hover:shadow-sm transition-all duration-300">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Calendar className="w-4 h-4 text-[#5127FF]" />
+                      <span className="font-medium">{new Date(edital.startDate).toLocaleDateString('pt-BR')}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-gray-500">até</span>
+                      <span className="font-medium">{new Date(edital.endDate).toLocaleDateString('pt-BR')}</span>
+                    </div>
+                  </div>
+
+                  {/* Action Button */}
+                  {edital.status === 'aberto' && (
+                    <Button
+                      className="w-full bg-gradient-to-r from-[#5127FF] to-[#5127FF]/90 hover:from-[#5127FF]/90 hover:to-[#5127FF] text-white font-semibold py-3 rounded-xl transition-all duration-300 transform group-hover:scale-105 shadow-md hover:shadow-lg"
+                    >
+                      Inscrever-se
+                    </Button>
+                  )}
+
+                  {edital.status === 'inscrito' && (
+                    <div className="text-center py-2">
+                      <span className="text-green-600 font-semibold text-sm bg-green-50 px-4 py-2 rounded-lg">
+                        Você já está inscrito nesse edital
+                      </span>
+                    </div>
+                  )}
+
+                  {edital.status === 'fechado' && (
+                    <div className="text-center py-2">
+                      <span className="text-gray-500 font-semibold text-sm bg-gray-50 px-4 py-2 rounded-lg">
+                        Inscrições encerradas
+                      </span>
                     </div>
                   )}
                 </div>
               </CardContent>
             </Card>
+          ))}
+        </div>
 
-            {/* Editais Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredEditais.map((edital) => (
-                <Card key={edital.id} className="group relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 bg-white">
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#5127FF]/5 to-[#F4DA02]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  
-                  {/* Badge de Status */}
-                  <div className="absolute top-4 right-4 z-10">
-                    {getStatusBadge(edital.status)}
-                  </div>
-                  
-                  <CardContent className="p-6 relative z-10">
-                    <div className="space-y-4">
-                      {/* Ícone e Tag */}
-                      <div className="flex items-start justify-between">
-                        <div className="w-12 h-12 bg-gradient-to-r from-[#5127FF] to-[#5127FF]/80 rounded-xl flex items-center justify-center shadow-lg">
-                          <span className="text-white font-bold text-lg">{edital.icon}</span>
-                        </div>
-                        <div className={`text-xs font-medium px-2 py-1 rounded-full ${getCategoryColor(edital.category)}`}>
-                          {edital.category}
-                        </div>
-                      </div>
-                      
-                      {/* Título e Descrição */}
-                      <div className="space-y-2">
-                        <h3 className="font-bold text-xl text-gray-900 group-hover:text-[#5127FF] transition-colors duration-300 line-clamp-2">
-                          {edital.title}
-                        </h3>
-                        <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
-                          {edital.description}
-                        </p>
-                      </div>
-                      
-                      {/* Info Cards */}
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="bg-gray-50 p-2 rounded-lg group-hover:bg-white group-hover:shadow-sm transition-all duration-300">
-                          <div className="flex items-center gap-1 text-xs text-gray-600">
-                            <MapPin className="w-3 h-3" />
-                            <span>{edital.location}</span>
-                          </div>
-                        </div>
-                        <div className="bg-gray-50 p-2 rounded-lg group-hover:bg-white group-hover:shadow-sm transition-all duration-300">
-                          <div className="flex items-center gap-1 text-xs text-gray-600">
-                            <Clock className="w-3 h-3" />
-                            <span>{edital.duration}</span>
-                          </div>
-                        </div>
-                        <div className="bg-gray-50 p-2 rounded-lg group-hover:bg-white group-hover:shadow-sm transition-all duration-300">
-                          <div className="flex items-center gap-1 text-xs text-gray-600">
-                            <Users className="w-3 h-3" />
-                            <span>{edital.participants} vagas</span>
-                          </div>
-                        </div>
-                        <div className="bg-gray-50 p-2 rounded-lg group-hover:bg-white group-hover:shadow-sm transition-all duration-300">
-                          <div className="flex items-center gap-1 text-xs font-medium">
-                            <Star className="w-3 h-3" />
-                            <span className={getDifficultyColor(edital.difficulty)}>{edital.difficulty}</span>
-                          </div>
-                        </div>
-                      </div>
+        {/* Empty State */}
+        {filteredEditais.length === 0 && (
+          <Card className="border-0 shadow-md">
+            <CardContent className="p-12 text-center">
+              <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+                <Search className="w-12 h-12 text-gray-400" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Nenhum edital encontrado</h3>
+              <p className="text-gray-600 mb-6">Tente ajustar os filtros ou o termo de pesquisa</p>
+              <Button
+                onClick={() => {
+                  setSearchTerm("");
+                  setSelectedCategory("Todos");
+                  setSelectedStatus("Todos");
+                  setSelectedDifficulty("Todos");
+                }}
+                className="bg-[#5127FF] hover:bg-[#5127FF]/90 text-white"
+              >
+                Limpar Filtros
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+      </div>
 
-                      {/* Investment */}
-                      <div className="p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-xl">
-                        <div className="text-center">
-                          <p className="text-xs text-green-700 font-medium">Investimento até</p>
-                          <p className="text-lg font-bold text-green-800">{edital.investment}</p>
-                        </div>
-                      </div>
-                      
-                      {/* Datas */}
-                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl group-hover:bg-white group-hover:shadow-sm transition-all duration-300">
-                        <div className="flex items-center gap-2 text-sm">
-                          <Calendar className="w-4 h-4 text-[#5127FF]" />
-                          <span className="font-medium">{new Date(edital.startDate).toLocaleDateString('pt-BR')}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <span className="text-gray-500">até</span>
-                          <span className="font-medium">{new Date(edital.endDate).toLocaleDateString('pt-BR')}</span>
-                        </div>
-                      </div>
-                      
-                      {/* Action Button */}
-                      {edital.status === 'aberto' && (
-                        <Button
-                          className="w-full bg-gradient-to-r from-[#5127FF] to-[#5127FF]/90 hover:from-[#5127FF]/90 hover:to-[#5127FF] text-white font-semibold py-3 rounded-xl transition-all duration-300 transform group-hover:scale-105 shadow-md hover:shadow-lg"
-                        >
-                          Inscrever-se
-                        </Button>
-                      )}
-                      
-                      {edital.status === 'inscrito' && (
-                        <div className="text-center py-2">
-                          <span className="text-green-600 font-semibold text-sm bg-green-50 px-4 py-2 rounded-lg">
-                            Você já está inscrito nesse edital
-                          </span>
-                        </div>
-                      )}
 
-                      {edital.status === 'fechado' && (
-                        <div className="text-center py-2">
-                          <span className="text-gray-500 font-semibold text-sm bg-gray-50 px-4 py-2 rounded-lg">
-                            Inscrições encerradas
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {/* Empty State */}
-            {filteredEditais.length === 0 && (
-              <Card className="border-0 shadow-md">
-                <CardContent className="p-12 text-center">
-                  <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
-                    <Search className="w-12 h-12 text-gray-400" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Nenhum edital encontrado</h3>
-                  <p className="text-gray-600 mb-6">Tente ajustar os filtros ou o termo de pesquisa</p>
-                  <Button
-                    onClick={() => {
-                      setSearchTerm("");
-                      setSelectedCategory("Todos");
-                      setSelectedStatus("Todos");
-                      setSelectedDifficulty("Todos");
-                    }}
-                    className="bg-[#5127FF] hover:bg-[#5127FF]/90 text-white"
-                  >
-                    Limpar Filtros
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-          </main>
-
-          
-            <Footer />
-        </SidebarInset>
-      </SidebarProvider>
+      <Footer />
     </div>
   );
 }

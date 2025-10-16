@@ -5,6 +5,7 @@ export interface Step {
   date: Date
   status: string
   event: Event
+  kind: string
   activity?: {
     dueDate: Date
     file: string
