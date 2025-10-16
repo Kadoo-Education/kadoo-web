@@ -12,17 +12,8 @@ export interface UpdateEdictDTO {
   endDate: Date
   file: string
   categories: string[]
-  steps: Step[]
 }
 
-interface Step {
-  title: string
-  description: string
-  date: Date
-  address?: string
-  dueDate?: Date
-  file?: string | null
-}[]
 export interface EdictGateway {
   create(edict: CreateEdictDTO): Promise<void>
   getAll(): Promise<EdictDTO[]>

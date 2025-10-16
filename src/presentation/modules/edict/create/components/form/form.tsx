@@ -8,9 +8,9 @@ import { createEdictValidation } from "@/validation/validators/create-edict/crea
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Checkbox } from "@/presentation/external/components/ui/checkbox"
 import { Separator } from "@/presentation/external/components/ui/separator"
-import { FileText, Calendar, Tag, Footprints, PlusCircleIcon, Trash2, Loader2 } from "lucide-react"
+import { FileText, Calendar, Tag, Loader2, Router } from "lucide-react"
 import { useState } from "react"
-import { Controller, useFieldArray, useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import remarkGfm from "remark-gfm"
 
@@ -23,18 +23,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/presentation/external
 import { format } from "date-fns"
 import { cn } from "@/presentation/external/lib/utils"
 import { ptBR } from "date-fns/locale"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/external/components/ui/select"
 import { edictGatewayHttp } from "@/infra/modules/edict/edict-gateway-http"
+import { useRouter } from "next/navigation"
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/presentation/external/components/ui/dialog"
-import { Link2, MapPin, Clock3 } from "lucide-react"
 
 const availableCategories = [
   "Tecnologia",
@@ -69,35 +60,23 @@ export async function uploadFile<T>(file: File): Promise<T> {
 }
 
 export function Form() {
-  const [eventOpen, setEventOpen] = useState(false)
-  const [activityOpen, setActivityOpen] = useState(false)
+  const { push } = useRouter()
   const [previewMode, setPreviewMode] = useState(false)
   const [loading, setLoading] = useState(false)
   const [edictFile, setEdictFile] = useState<File | null>(null)
-  const [activityFile, setActivityFile] = useState<File | null>(null)
 
   const { register, handleSubmit, control, watch, formState: { errors } } = useForm<CreateEdictValidation>({
     resolver: zodResolver(createEdictValidation),
     defaultValues: {
-      categories: [],
-      steps: [{
-        title: "",
-      }]
+      categories: []
     },
   })
-
-  const { fields: steps, append, remove } = useFieldArray({
-    control,
-    name: "steps"
-  });
 
   console.log(errors)
 
   async function handleCreateEdictForm(data: CreateEdictValidation) {
 
     setLoading(true)
-
-    console.log(data, edictFile, activityFile)
 
     if (!edictFile) {
       toast.error("Arquivo do edital é obrigatório.");
@@ -107,27 +86,15 @@ export function Form() {
     try {
       const { url: edictUrl } = await uploadFile<{ url: string; error: boolean }>(edictFile);
 
-      const stepUploads = await Promise.all(
-        data.steps.map(async (s) => {
-          if (s.format === "Atividade" && activityFile) {
-            const { url } = await uploadFile<{ url: string; error: boolean }>(activityFile);
-            return url;
-          }
-          return undefined;
-        })
-      )
 
       await edictGatewayHttp.create({
         ...data,
         file: edictUrl,
-        steps: data.steps.map((step, i) => ({
-          ...step,
-          file: stepUploads[i],
-        })),
       })
 
       toast.success("Edital publicado com sucesso!");
 
+      push("/adm/editais")
     } catch {
       toast.error("Falha no upload. Verifique os arquivos e tente novamente.");
     } finally {
@@ -135,23 +102,10 @@ export function Form() {
     }
   }
 
-  function handleIncreaseStep() {
-    append({
-      title: "",
-      description: "",
-      date: new Date(),
-
-    })
-  }
-
-  function handleDecreaseStep(index: number) {
-    remove(index)
-  }
 
   const startDate = watch("startDate")
   const endEdictDate = watch("endDate")
   const descriptionWatched = watch("description")
-
 
   return (
     <form className="space-y-8" onSubmit={handleSubmit(handleCreateEdictForm)} encType="multipart/form-data">
@@ -422,7 +376,7 @@ export function Form() {
 
       <Separator />
 
-      <div className="flex items-center gap-2 mb-4">
+      {/* <div className="flex items-center gap-2 mb-4">
         <Footprints className="w-5 h-5 text-[#5127FF]" />
         <h2 className="text-xl font-semibold text-gray-900">Etapas do Edital</h2>
       </div>
@@ -578,7 +532,7 @@ export function Form() {
             <Button variant="ghost" type="button" onClick={() => setActivityOpen(false)}>Cancelar</Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
 
       {/* <div className="flex items-center gap-2 mb-4">
         <Footprints className="w-5 h-5 text-[#5127FF]" />

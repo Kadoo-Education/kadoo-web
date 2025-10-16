@@ -1,3 +1,4 @@
+"use client"
 import { Button } from "@/presentation/external/components/ui/button";
 import { Card, CardContent } from "@/presentation/external/components/ui/card";
 import { Calendar } from "lucide-react";

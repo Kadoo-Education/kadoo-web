@@ -25,6 +25,9 @@ import { useEffect, useState } from "react"
 import { EdictDTO } from "@/infra/modules/edict/dto/edict-dto"
 import Link from "next/link"
 import { edictGatewayHttp } from "@/infra/modules/edict/edict-gateway-http"
+import { Card, CardContent, CardHeader, CardTitle } from "@/presentation/external/components/ui/card"
+import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 const availableCategories = [
   "Tecnologia",
@@ -39,17 +42,6 @@ const availableCategories = [
   "Mobilidade",
 ]
 
-const stepSchema = z.object({
-  title: z.string(),
-  description: z.string(),
-  date: z.date(),
-  format: z.enum(["Evento", "Atividade"]),
-  mode: z.string().optional(),
-  address: z.string().optional(),
-  meetingLink: z.string().optional(),
-  dueDate: z.date().optional(),
-  activityFile: z.string().nullable().optional(),
-})
 
 const schema = z.object({
   title: z.string().min(1, "Título é obrigatório."),
@@ -61,22 +53,9 @@ const schema = z.object({
   endDate: z.date(),
   file: z.string(),
   categories: z.array(z.string()).min(1, "Pelo menos uma categoria deve ser selecionada."),
-  steps: z.array(stepSchema).min(1, "Adicione pelo menos uma etapa.")
 })
 
 type EditEdictValidation = z.infer<typeof schema>
-
-interface Step {
-  id: number
-  title: string
-  description: string
-  date: Date
-  address: string
-  meetingLink: string
-  dueDate: Date
-  mode: string
-  activityFile: string
-}
 
 interface FormProps {
   edict: {
@@ -91,20 +70,19 @@ interface FormProps {
     startDate: Date
     endDate: Date
     categories: string[]
-    steps: Step[]
   }
 }
 
 export function Form({ edict }: FormProps) {
+  const { push } = useRouter()
 
   const [previewMode, setPreviewMode] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const [edictFile, setEdictFile] = useState<File | null>(null)
-  const [activityFile, setActivityFile] = useState<File | null>(null)
 
 
-  const { register, watch, control, handleSubmit, setValue, formState: { errors } } = useForm<EditEdictValidation>({
+  const { register, watch, control, handleSubmit, formState: { errors } } = useForm<EditEdictValidation>({
     resolver: zodResolver(schema),
     defaultValues: {
       title: edict.title,
@@ -116,33 +94,13 @@ export function Form({ edict }: FormProps) {
       endDate: new Date(edict.endDate),
       file: edict.file,
       categories: edict.categories,
-      steps: edict.steps.map((step) => ({
-        ...step,
-        mode: step.mode ?? "",
-        date: new Date(step.date as unknown as string),
-        dueDate: step.dueDate ? new Date(step.dueDate as unknown as string) : undefined,
-        address: step.address ?? "",
-        meetingLink: step.meetingLink ?? "",
-        activityFile: (step as any).activityFile ?? null,
-      }))
     },
-
     shouldUnregister: false,
   })
-
-  // useEffect(() => {
-  //   setEdictFile(edict?.file)
-  // }, [])
 
   function removeEdictFile() {
     setEdictFile(null)
   }
-
-  const { fields: steps, append, remove } = useFieldArray({
-    control,
-    name: "steps",
-    keyName: "fieldId"
-  });
 
   async function uploadFile<T>(file: File): Promise<T> {
     const formData = new FormData();
@@ -161,63 +119,36 @@ export function Form({ edict }: FormProps) {
     return data
   }
 
-  function handleIncreaseStep() {
-    append({
-      title: "",
-      description: "",
-      date: new Date(),
-    })
-  }
-
-  function handleDecreaseStep(index: number) {
-    remove(index)
-  }
 
   console.log(errors)
 
   async function handleUpdateEdictForm(data: EditEdictValidation) {
 
     let edictUrl = "";
-    let activityUrl: (string | undefined)[]
 
     if (edictFile) {
-
       const { url: edictPdf } = await uploadFile<{ url: string; error: boolean }>(edictFile);
 
       edictUrl = edictPdf;
     }
 
-
-    if (activityFile) {
-      const stepUploads = await Promise.all(
-        data.steps.map(async (s) => {
-          if (s.format === "Atividade" && activityFile) {
-            const { url } = await uploadFile<{ url: string; error: boolean }>(activityFile);
-            return url;
-          }
-          return undefined;
-        })
-      );
-
-      activityUrl = stepUploads
-    }
-
-
-
     try {
+      setLoading(true)
       await edictGatewayHttp.update({
         id: edict.id,
         ...data,
         startDate: new Date(data.startDate),
         endDate: new Date(data.endDate),
         file: edictFile ? edictUrl : edict.file,
-        steps: data.steps.map((step, i) => ({
-          ...step,
-          file: activityFile ? activityUrl[i] : activityFile
-        }))
       })
+      toast.success("Edital atualizado com sucesso!")
+
+      push("/adm/editais")
+
     } catch (error) {
       console.error(error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -506,235 +437,6 @@ export function Form({ edict }: FormProps) {
 
       <Separator />
 
-      <div className="flex items-center gap-2 mb-4">
-        <Footprints className="w-5 h-5 text-[#5127FF]" />
-        <h2 className="text-xl font-semibold text-gray-900">Crie aqui as etapas do Edital</h2>
-      </div>
-
-      {steps.map((step, index) => {
-        const eventFormat = watch(`steps.${index}.format`);
-
-        const date = watch(`steps.${index}.date`)
-
-        const dueDateActivity = watch(`steps.${index}.dueDate`)
-
-        return (
-          <div key={step.fieldId} className="mb-6 p-4 border border-dashed rounded-md shadow-sm bg-white space-y-4 w-full">
-
-            <div className="flex items-center justify-between">
-              <span>Etapa {index + 1}</span>
-
-
-              {index !== 0 && (
-
-                <button type="button"
-                  className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-red-600 hover:text-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
-                  onClick={() => handleDecreaseStep(index)}
-                >
-                  <Trash2 className="h-4 w-4" aria-hidden="true" size={5} />
-                  <span className="hidden sm:inline text-sm">Remover</span>
-                  <span className="sr-only">Remover etapa {index + 1}</span>
-                </button>
-              )}
-            </div>
-
-
-
-            <Input.Root>
-              <Input.Label htmlFor={`steps.${index}.title`}>Título *</Input.Label>
-              <Input.Core
-                id={`steps.${index}.title`}
-                {...register(`steps.${index}.title`)}
-                className="w-full"
-                placeholder="Digite o título da etapa"
-              />
-            </Input.Root>
-
-            <Input.Root>
-              <Input.Label>Descrição *</Input.Label>
-              <Textarea
-                id={`steps.${index}.descripton`}
-                placeholder="Digite a descrição da Etapa"
-                {...register(`steps.${index}.description`)}
-                className="max-w-full resize-none"
-              />
-            </Input.Root>
-
-            <div className="flex items-center justify-between gap-6">
-
-              <Input.Root>
-                <Input.Label htmlFor={`steps.${index}.date`}>Selecione a data *</Input.Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className={cn(
-                      "w-full text-left font-normal",
-                      !date && "text-muted-foreground"
-                    )}>
-                      {date ? (
-                        format(date, "PPP", { locale: ptBR })
-                      ) : (
-                        <span className="w-full text-left">Selecione uma data</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent>
-                    <Controller
-                      control={control}
-                      name={`steps.${index}.date`}
-                      render={({ field: { onBlur, onChange } }) => (
-                        <CalendarShad
-                          mode="single"
-                          selected={date}
-                          onSelect={onChange}
-                          onDayBlur={onBlur}
-                          locale={ptBR}
-                          captionLayout="dropdown"
-                        />
-                      )}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </Input.Root>
-              <Input.Root>
-                <Input.Label htmlFor={`steps.${index}.format`}>Formato da Etapa</Input.Label>
-                <Controller
-                  control={control}
-                  name={`steps.${index}.format`}
-                  render={({ field: { onChange, onBlur } }) => (
-                    <Select value={eventFormat} onValueChange={onChange}>
-                      <SelectTrigger className="w-full" onBlur={onBlur}>
-                        <SelectValue placeholder="Selecione" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Evento">Evento</SelectItem>
-                        <SelectItem value="Atividade">Atividade</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </Input.Root>
-            </div>
-
-            <>
-
-              <div>
-                <Input.Label htmlFor={`steps.${index}.mode`}>Modalidade do Evento</Input.Label>
-                <Controller
-                  control={control}
-                  name={`steps.${index}.mode`}
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <Select onValueChange={onChange} value={value}>
-                      <SelectTrigger className="w-full mt-2" onBlur={onBlur}>
-                        <SelectValue placeholder="Selecione uma modalidade" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Presencial">Presencial</SelectItem>
-                        <SelectItem value="Online">Online</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </div>
-
-              <Input.Root>
-                <Input.Label htmlFor={`steps.${index}.address`}>Endereço</Input.Label>
-                <Input.Core
-                  id={`steps.${index}.address`}
-                  placeholder="Informe o endereço do Evento"
-                  {...register(`steps.${index}.address`)}
-                  className="w-full"
-                />
-              </Input.Root>
-
-              <Input.Root>
-                <Input.Label htmlFor={`steps.${index}.meetingLink`}>Link da Reunião</Input.Label>
-                <Input.Core
-                  id={`steps.${index}.meetingLink`}
-                  placeholder="Informe o link da reunião"
-                  {...register(`steps.${index}.meetingLink`)}
-                  className="w-full"
-                />
-              </Input.Root>
-            </>
-
-            <>
-              <Input.Root>
-                <Input.Label htmlFor="startDate" className="text-sm font-medium text-gray-700 block">
-                  Data de Entrega *
-                </Input.Label>
-
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button disabled={!startDate} variant="outline" className={cn(
-                      "w-[240px] pl-3 text-left font-normal",
-                      !dueDateActivity && "text-muted-foreground"
-                    )}>
-                      <span className="text-left w-full">{dueDateActivity ? (
-                        format(dueDateActivity, "PPP", { locale: ptBR })
-                      ) : (
-                        "Selecione uma data"
-                      )}</span>
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent>
-                    <Controller
-                      control={control}
-                      name={`steps.${index}.dueDate`}
-                      render={({ field: { onChange, onBlur } }) => (
-                        <CalendarShad
-                          mode="single"
-                          selected={dueDateActivity}
-                          onDayBlur={onBlur}
-                          onSelect={onChange}
-                          locale={ptBR}
-                          captionLayout="dropdown"
-                        />
-                      )}
-                    />
-
-                  </PopoverContent>
-                </Popover>
-              </Input.Root>
-
-              <Input.Root>
-                <Input.Label>PDF da Atividade</Input.Label>
-
-
-                {step.activityFile ? (
-
-                  <div className="flex justify-between">
-                    <Link href={String(step.activityFile)} target="_blank" className="underline">
-                      Ver arquivo
-                    </Link>
-                    <X
-                      role="button"
-                      className="cursor-pointer"
-                      onClick={() => setValue(`steps.${index}.activityFile`, null)}
-                    />
-                  </div>
-                ) : (
-                  <Input.Core
-                    type="file"
-                    accept="application/pdf"
-                    className="w-full"
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      const file = e.target.files?.[0] ?? null
-                      setActivityFile(file)
-                    }}
-                  />
-                )}
-              </Input.Root>
-            </>
-          </div>
-        );
-      })}
-      <div className="w-full flex flex-col justify-center items-center">
-        <button type="button" className="flex flex-col items-center text-gray-700 hover:text-gray-900 focus:outline-none" onClick={handleIncreaseStep}>
-          <PlusCircleIcon />
-          <span>Adicionar etapa</span>
-        </button>
-      </div>
-
 
       <div className="flex flex-col sm:flex-row gap-4 pt-6">
         <Button
@@ -745,11 +447,22 @@ export function Form({ edict }: FormProps) {
           {loading && <Loader2 className="h-5 w-5 animate-spin" />}
           {loading ? "Atualizando..." : "Atualizar Edital"}
         </Button>
-
-        <Button type="reset" variant="ghost" className="text-gray-600 hover:text-gray-800 px-8 py-3 h-auto">
-          Cancelar
-        </Button>
       </div>
+
+      <Card className="mt-6 border-0 shadow-sm ring-1 ring-[#5127FF]/10">
+        <CardHeader>
+          <CardTitle className="text-base font-medium text-[#5127FF]">
+            Edite aqui as trilhas desse edital
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Link href={`/adm/editais/${edict?.id}`}>
+            <Button variant="outline" className="text-[#5127FF] hover:bg-[#5127FF]/10">
+              Ir para trilhas
+            </Button>
+          </Link>
+        </CardContent>
+      </Card>
     </form>
   )
 }

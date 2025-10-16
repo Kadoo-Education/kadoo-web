@@ -5,7 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/presentation/external
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/presentation/external/components/ui/select'
 import { cn } from '@/presentation/external/lib/utils'
 import { Input } from '@/presentation/shared/components/form/input/input'
-import { Check } from 'lucide-react'
+import { Check, Loader2 } from 'lucide-react'
 
 import { ptBR } from "date-fns/locale"
 import { format } from "date-fns"
@@ -212,13 +212,14 @@ export function Form() {
         )}
       </div>
 
-      <div>
+      <div className='w-full'>
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full py-3 px-4 text-white text-sm font-medium bg-[#5f2eea] rounded-md hover:bg-[#5f2eea]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-black hover:opacity-90 transition-all text-white font-medium rounded-lg px-6 py-3 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed w-full"
         >
-          {isSubmitting ? 'Criando conta...' : 'Criar conta'}
+          {isSubmitting && <Loader2 className="w-5 h-5 animate-spin" />}
+          {isSubmitting ? '' : 'Entrar'}
         </button>
       </div>
 

@@ -1,6 +1,6 @@
 import { Either, left, right } from "@/infra/shared/utils/either";
 import { HttpClient } from "@/infra/external/http/http-client";
-import axios, { AxiosInstance, isAxiosError } from "axios";
+import axios, { AxiosError, AxiosInstance, isAxiosError } from "axios";
 import { JsCookieBrowserStorage, jsCookieBrowserStorage } from "@/infra/external/storage/js-cookie-browser-storage";
 
 const tokenName = process.env.NEXT_PUBLIC_TOKEN_NAME;
@@ -14,15 +14,32 @@ export class AxiosAdapter implements HttpClient {
     });
 
     this.api.interceptors.request.use((config) => {
-      // browser.get("")
       // const token = this.getToken();
 
-      // if (token) {
-      //   config.headers.Authorization = `Bearer ${token}`;
-      // }
-      config.headers.Authorization = `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrYWRvby1hcGkiLCJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJpZCI6MSwibmFtZSI6InBlZHJvIGhlbnJpcXVlIiwicm9sZSI6IlJPTEVfVU5LTk9XTiIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiZXhwIjoxNzYwMjI4MDkxfQ.dnSvDAaINv5SCusIsK9EP0Xqd_dEfwVkRyUpwPXhIJU`
+      console.log(config)
+      const token = this.browser.get(process.env.NEXT_PUBLIC_TOKEN_NAME)
+      
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
       return config;
     });
+
+    this.api.interceptors.response.use(
+      res => res,
+      async (err: AxiosError) => {
+        const tokenName = process.env.NEXT_PUBLIC_TOKEN_NAME as string
+
+        const isServer = typeof window === 'undefined'
+
+        if (err.response?.status === 401 && !isServer) {
+          await this.browser.delete(tokenName)
+          window.location.href = '/login'
+        }
+
+        return Promise.reject(err)
+      }
+    )
   }
 
   async get<Result>(
@@ -38,6 +55,7 @@ export class AxiosAdapter implements HttpClient {
       if (isAxiosError(error)) {
         return left(new Error(error.response?.data.message));
       }
+      console.log(error)
 
       return left(new Error("Ocorreu um erro interno."));
     }
@@ -105,5 +123,8 @@ export class AxiosAdapter implements HttpClient {
     }
   }
 }
-// const getToken = () => jsCookieBrowserStorage.get(tokenName);
+const getToken = () => jsCookieBrowserStorage.get(tokenName);
 export const client = new AxiosAdapter(jsCookieBrowserStorage);
+
+
+

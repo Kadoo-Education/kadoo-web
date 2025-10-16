@@ -2,6 +2,7 @@ import { client, HttpClient } from "@/infra/external/http";
 import { EdictGateway, UpdateEdictDTO } from "./edict-gateway";
 import { CreateEdictDTO } from "./dto/create-edict-dto";
 import { EdictDTO } from "./dto/edict-dto";
+import { notFound } from "next/navigation";
 
 export class EdictGatewayHttp implements EdictGateway {
 
@@ -33,8 +34,7 @@ export class EdictGatewayHttp implements EdictGateway {
     const response = await this.client.get<EdictDTO>(`/edict/${id}`)
 
     if (response.isLeft()) {
-      console.error("ERRO É ESSRE AQUI", response.value)
-      throw new Error("Edital não encontrado.")
+      return notFound()
     }
 
     return response.value

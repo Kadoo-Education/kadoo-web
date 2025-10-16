@@ -39,10 +39,18 @@ export interface CreateOnlineStepProps {
   format: string
   edictId: number
 }
-
+export interface CreateActivityStepProps {
+  title: string
+  description: string
+  date: Date
+  dueDate: Date
+  file: string
+  edictId: number
+}
 export interface StepGateway {
   getByEdictId(edictId: number): Promise<Step[]> 
   getById(stepId: number): Promise<Step>
   createInPerson(props: CreateStepProps): Promise<void>
   createOnline(props: CreateOnlineStepProps): Promise<void>
+  createActivity(props: CreateActivityStepProps): Promise<void>
 }

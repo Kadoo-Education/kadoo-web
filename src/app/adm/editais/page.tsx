@@ -185,7 +185,7 @@ export default function AdminEdictsPage() {
                 <TableHead>Título</TableHead>
                 <TableHead>Período</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Gerenciar Etapas</TableHead>
+                {/* <TableHead>Gerenciar Etapas</TableHead> */}
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -203,11 +203,11 @@ export default function AdminEdictsPage() {
                       {e.status}
                     </span>
                   </TableCell>
-                  <TableCell>
+                  {/* <TableCell>
                     <Link href={""} className={`px-2 py-1 rounded-full text-xs font-semibold ${statusColorMap[e.status]}`}>
                       Gerenciar etapas
                     </Link>
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button asChild variant="outline" size="sm">

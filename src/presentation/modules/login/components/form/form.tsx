@@ -11,6 +11,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { APP_ROUTES } from "@/shared/constants/routes";
 import { toast } from "sonner";
+import Link from "next/link";
 
 export function Form() {
   const { push } = useRouter()
@@ -42,13 +43,14 @@ export function Form() {
   }
 
   return (
-    <form className="flex flex-col gap-6" onSubmit={handleSubmit(handleSubmitLogin)}>
+    <form className="flex flex-col gap-6 w-full mt-5" onSubmit={handleSubmit(handleSubmitLogin)}>
       <Input.Root>
         <Input.Label htmlFor="email">Email</Input.Label>
         <Input.Core
           id="email"
           type="email"
           placeholder="seu@email.com"
+          className="w-full"
           {...register("email")}
         />
         {errors.email && (
@@ -63,7 +65,7 @@ export function Form() {
         <Input.Core
           id="password"
           type="password"
-          placeholder="••••••••"
+          placeholder="••••••••••••••••"
           {...register("password")}
         />
         {errors.password && (
@@ -73,10 +75,12 @@ export function Form() {
         )}
       </Input.Root>
 
+      <Link href={APP_ROUTES.register} className="underline">Esqueceu a senha?</Link>
+
       <button
         type="submit"
         disabled={isLoading}
-        className="bg-gradient-to-r from-[#5127FF] to-[#5f2eea] hover:opacity-90 transition-all text-white font-medium rounded-lg px-6 py-3 mt-6 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+        className="bg-black hover:opacity-90 transition-all text-white font-medium rounded-lg px-6 py-3 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {isLoading && <Loader2 className="w-5 h-5 animate-spin" />}
         {isLoading ? '' : 'Entrar'}

@@ -11,26 +11,13 @@ import { CreateOnlineEventDialog } from "@/presentation/modules/step-by-id/compo
 import { CreateActivityDialog } from "@/presentation/modules/step-by-id/components/create/create-activity-dialog"
 import { stepGatewayHttp } from "@/infra/modules/step/step-gateway-http"
 import { createInPersonStepAction } from "./(actions)/create-in-person-step-action"
+import { StepCard } from "@/presentation/modules/step-by-id/components/view/step-card"
+import { EventStepCard } from "@/presentation/modules/step-by-id/components/view/event-step-card"
+import { Fragment } from "react"
+import { ActivityStepCard } from "@/presentation/modules/step-by-id/components/view/activity-step-card"
 
 type PageProps = {
   params: Promise<{ id: string }>
-}
-
-const fmtDate = (iso?: string) =>
-  iso ? new Date(iso).toLocaleDateString("pt-BR") : "-"
-
-const fmtMode = (s?: string | null) =>
-  s ? s.toString().toLowerCase().replace(/^\w/, c => c.toUpperCase()) : "-"
-
-const stepPill = (step: any) => {
-  if (step.kind === "event") {
-    const isOnline = step.event?.type === "online"
-    return {
-      icon: isOnline ? Link2 : MapPin,
-      text: `Evento ${isOnline ? "Online" : "Presencial"}`
-    }
-  }
-  return { icon: Footprints, text: "Atividade" }
 }
 
 async function getEdictById(id: number) {
@@ -68,6 +55,7 @@ export default async function EdictByIdPage({ params }: PageProps) {
 
           <div className="flex items-center gap-2">
             <Button variant="outline">Editar edital</Button>
+
             <Button variant="ghost" asChild>
               <a href="/adm/editais">Voltar</a>
             </Button>
@@ -99,7 +87,7 @@ export default async function EdictByIdPage({ params }: PageProps) {
                 </Button>
               </CreateOnlineEventDialog>
 
-              <CreateActivityDialog>
+              <CreateActivityDialog edictId={Number(id)}>
                 <Button variant="outline" className="border-[#5127FF]">
                   <PlusCircle className="mr-2 h-5 w-5" />
                   Adicionar Atividade
@@ -108,95 +96,27 @@ export default async function EdictByIdPage({ params }: PageProps) {
             </div>
 
             <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
-              {/* Evento Presencial */}
-              {steps.map((step: any) => {
-                const pill = stepPill(step)
-                const PillIcon = pill.icon
+              {steps.length > 0 ? (
+                steps?.map((step: any) => (
+                  <Fragment key={step.id}>
+                    {step?.kind === "event" && (
+                      <EventStepCard step={step} />
+                    )}
 
-                return (
-                  <Card key={step.id} className="border-0 shadow-sm ring-1 ring-[#5127FF]/10">
-                    <CardHeader className="pb-2 flex flex-row items-start justify-between">
-                      <div>
-                        <div className="inline-flex items-center gap-2 rounded-full bg-[#5127FF]/10 px-2.5 py-1 text-xs font-medium text-[#5127FF]">
-                          <PillIcon className="h-3.5 w-3.5" />
-                          {pill.text}
-                        </div>
-                        <CardTitle className="mt-2 text-base">{step.title}</CardTitle>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <Button size="sm" variant="outline">Editar</Button>
-                        <Button size="sm" variant="destructive">Deletar</Button>
-                      </div>
-                    </CardHeader>
-
-                    <CardContent className="text-sm text-gray-600 space-y-2">
-                      <div className="flex items-center gap-2">
-                        <CalIcon className="h-4 w-4 text-gray-500" />
-                        <span>Data: {fmtDate(step.date)}</span>
-                      </div>
-
-                      {step.kind === "event" && (
-                        <>
-                          {step.event?.meetingLink && (
-                            <div className="flex items-center gap-2">
-                              <Link2 className="h-4 w-4 text-gray-500" />
-                              <a
-                                href={step.event.meetingLink}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="underline underline-offset-2"
-                              >
-                                {step.event.meetingLink}
-                              </a>
-                            </div>
-                          )}
-
-                          {step.event?.address && (
-                            <div className="flex items-center gap-2">
-                              <MapPin className="h-4 w-4 text-gray-500" />
-                              <span>{step.event.address}</span>
-                            </div>
-                          )}
-
-                          <Separator className="my-2" />
-                          <div className="text-xs text-gray-500">
-                            formato: Evento • modo: {fmtMode(step.event?.type)}
-                          </div>
-                        </>
-                      )}
-
-                      {step.kind === "activity" && (
-                        <>
-                          <div className="flex items-center gap-2">
-                            <Clock3 className="h-4 w-4 text-gray-500" />
-                            <span>Entrega até: {fmtDate(step.activity?.dueDate)}</span>
-                          </div>
-
-                          {step.activity?.file && (
-                            <div className="flex items-center gap-2">
-                              <Link2 className="h-4 w-4 text-gray-500" />
-                              <a
-                                href={step.activity.file}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="underline underline-offset-2"
-                              >
-                                Modelo / arquivo da atividade
-                              </a>
-                            </div>
-                          )}
-
-                          <Separator className="my-2" />
-                          <div className="text-xs text-gray-500">
-                            formato: Atividade{step.activity?.file ? " • arquivo obrigatório" : ""}
-                          </div>
-                        </>
-                      )}
-                    </CardContent>
-                  </Card>
-                )
-              })}
+                    {step?.kind === "activity" && (
+                      <ActivityStepCard step={step} />
+                    )}
+                    {/* <StepCard step={step} key={step.id} /> */}
+                  </Fragment>
+                ))
+              ) : (
+                <div className="mt-4 col-span-2 w-full">
+                  <div className="text-center text-sm text-gray-600 p-6 border border-dashed rounded-lg">
+                    Nenhuma etapa adicionada ainda.
+                    <div className="mt-2">Use os botões acima para criar Evento ou Atividade.</div>
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -204,3 +124,5 @@ export default async function EdictByIdPage({ params }: PageProps) {
     </div>
   )
 }
+
+

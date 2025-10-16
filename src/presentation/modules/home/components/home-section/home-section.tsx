@@ -1,4 +1,3 @@
-'use client'
 
 import { Button } from "@/presentation/external/components/ui/button";
 import { SidebarInset, SidebarProvider } from "@/presentation/external/components/ui/sidebar";
@@ -7,15 +6,17 @@ import { Calendar, Star, TrendingUp, Users } from "lucide-react";
 import { Progress } from "@/presentation/external/components/ui/progress";
 import { Header } from "@/presentation/shared/layout/components/header/header";
 import { Avatar, AvatarImage, AvatarFallback } from "@/presentation/external/components/ui/avatar";
-import { useCallback, useEffect, useState } from "react";
-import { userGatewayHttp } from "@/infra/modules/user/user-gateway-http";
-import { EnumProfile, Profile } from "@/presentation/shared/layout/components/profile/profile";
+import { UserGatewayHttp } from "@/infra/modules/user/user-gateway-http";
+import { Profile } from "@/presentation/shared/layout/components/profile/profile";
 import { Card, CardContent } from "@/presentation/external/components/ui/card";
 
 import Link from "next/link";
-import { EdictItems } from "../edicts-items/edicts-items";
-import { edictGatewayHttp } from "@/infra/modules/edict/edict-gateway-http";
-import { EdictDTO } from "@/infra/modules/edict/dto/edict-dto";
+import { WelcomeBanner } from "../welcome-banner";
+import { EnrollmentOverview } from "../enrollment-overview";
+import { HttpClientFactory } from "@/infra/external/http/axios/http-client-factory";
+import { Suspense } from "react";
+import { Skeleton } from "@/presentation/shared/layout/components/skeleton/skeleton";
+import { HighlightMentors } from "../highlight-mentors";
 
 const mentores = [
   {
@@ -107,25 +108,13 @@ export const edicts = [
   },
 ]
 
-export function HomeSection() {
 
-  const [user, setUser] = useState<{ name: string, role: EnumProfile } | null>(null)
-  const [edicts, setEdicts] = useState<EdictDTO[] | null>(null)
+export async function HomeSection() {
+  const client = HttpClientFactory.create()
+  const userGatewayHttp = new UserGatewayHttp(client)
 
-  const getUser = useCallback(async () => {
-    await userGatewayHttp.get().then(setUser)
-  }, [])
+  const user = await userGatewayHttp.get()
 
-  const getAllEdictsAttachUser = useCallback(async () => {
-    await edictGatewayHttp.edictsAttachUser().then(setEdicts)
-  }, [])
-
-  useEffect(() => {
-    getUser()
-    getAllEdictsAttachUser()
-  }, [getUser, getAllEdictsAttachUser])
-
-  // if (!user) return <Loading />
 
   const firstName = user?.name.split(" ")[0]
   const role = user?.role
@@ -139,21 +128,11 @@ export function HomeSection() {
           <Header profile={<Profile {...user} />} />
 
           <main className="p-6 space-y-8">
-            <Card className="bg-gradient-to-r from-[#5127FF] to-[#5127FF]/80 text-white border-0 shadow-xl">
-              <CardContent className="p-8">
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                  <div className="space-y-4">
-                    <h2 className="text-3xl font-bold">Bem-vindo, {firstName}! 👋</h2>
-                    <p className="text-xl text-white/90">Pronto para transformar sua ideia em realidade?</p>
-                  </div>
-                  <Button size="lg" className="bg-[#F4DA02] text-white hover:bg-[#F4DA02]/90 font-semibold px-8 shadow-lg hover:shadow-xl transition-all duration-300">
-                    Ver Editais Abertos
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+            <WelcomeBanner name={String(firstName)} />
+
+            <div className="grid gap-6  grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
               <Card className="group relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 bg-white">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#5127FF]/5 to-[#5127FF]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <CardContent className="p-6 relative z-10">
@@ -240,12 +219,11 @@ export function HomeSection() {
                   Ver Todos
                 </Button>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {edicts?.map((edict) => (
-                  <EdictItems key={edict.id} edict={edict} />
-                ))}
-              </div>
+              <Suspense
+                fallback={<Skeleton.EnrollmentOverviewSkeleton />}
+              >
+                <EnrollmentOverview />
+              </Suspense>
             </div>
 
             <div className="space-y-8">
@@ -266,64 +244,10 @@ export function HomeSection() {
 
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {mentores.map((mentor) => (
-                  <Card key={mentor.id} className="group relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 bg-white">
-                    {/* Gradient Background */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#5127FF]/5 to-[#F4DA02]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <Suspense fallback={<Skeleton.HighlightMentorsSkeleton />}>
+                <HighlightMentors />
+              </Suspense>
 
-                    <CardContent className="p-6 relative z-10">
-                      <div className="text-center mb-6">
-                        <Avatar className="w-20 h-20 mx-auto mb-4 ring-4 ring-white shadow-lg group-hover:ring-[#5127FF]/20 transition-all duration-300">
-                          <AvatarImage src={mentor.avatar} alt={mentor.name} />
-                          <AvatarFallback className="bg-gradient-to-r from-[#5127FF] to-[#5127FF]/80 text-white text-xl font-bold">
-                            {mentor.name.split(" ").map((n) => n[0]).join("")}
-                          </AvatarFallback>
-                        </Avatar>
-                        <h3 className="font-bold text-xl text-gray-900 mb-2">{mentor.name}</h3>
-                        <p className="text-[#5127FF] font-medium text-sm bg-[#5127FF]/10 px-3 py-1 rounded-full inline-block mb-1">
-                          {mentor.area}
-                        </p>
-                        {mentor.specialty && (
-                          <p className="text-xs text-gray-500 mt-1">{mentor.specialty}</p>
-                        )}
-                      </div>
-
-                      <div className="flex items-center justify-center gap-6 mb-6 p-4 bg-gray-50 rounded-xl group-hover:bg-white group-hover:shadow-sm transition-all duration-300">
-                        <div className="text-center">
-                          <div className="flex items-center gap-1 justify-center mb-1">
-                            <Star className="w-4 h-4 fill-[#F4DA02] text-[#F4DA02]" />
-                            <span className="font-bold text-gray-900">{mentor.rating}</span>
-                          </div>
-                          <span className="text-xs text-gray-600">Avaliação</span>
-                        </div>
-                        <div className="w-px h-8 bg-gray-300" />
-                        <div className="text-center">
-                          <div className="flex items-center gap-1 justify-center mb-1">
-                            <Users className="w-4 h-4 text-[#5127FF]" />
-                            <span className="font-bold text-gray-900">{mentor.sessions}</span>
-                          </div>
-                          <span className="text-xs text-gray-600">Sessões</span>
-                        </div>
-                      </div>
-
-                      <Button
-                        className="w-full bg-gradient-to-r from-[#5127FF] to-[#5127FF]/90 hover:from-[#5127FF]/90 hover:to-[#5127FF] text-white font-semibold py-3 rounded-xl transition-all duration-300 transform group-hover:scale-105 shadow-md hover:shadow-lg"
-                      >
-                        Agendar Mentoria
-                      </Button>
-                    </CardContent>
-
-                    {mentor.rating === 5.0 && (
-                      <div className="absolute -top-2 -right-2 bg-gradient-to-r from-[#F4DA02] to-[#F4DA02]/80 text-white text-xs font-bold px-3 py-1 rounded-full transform rotate-12 shadow-lg z-20">
-                        ⭐ TOP
-                      </div>
-                    )}
-                  </Card>
-                ))}
-              </div>
-
-              {/* CTA Section */}
               <div className="mt-8 p-8 bg-gradient-to-r from-[#5127FF]/10 to-[#F4DA02]/10 rounded-2xl border border-[#5127FF]/20 shadow-sm">
                 <div className="text-center space-y-4">
                   <h3 className="text-2xl font-bold text-gray-900">Não encontrou o mentor ideal?</h3>
