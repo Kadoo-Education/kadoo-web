@@ -213,7 +213,6 @@ function PendingMentorsList() {
 
 export default function AdminPage() {
 
-  const { push } = useRouter()
   const [user, setUser] = useState<{ name: string, role: EnumProfile } | null>(null)
   const [edicts, setEdicts] = useState<{
     id: number
@@ -238,92 +237,15 @@ export default function AdminPage() {
     getAllEdicts()
   }, [getUser, getAllEdicts])
 
-  // if (!user) return <Loading />
 
   const firstName = user?.name.split(" ")[0]
-  const role = user?.role
 
-  async function handleLogOut() {
-    await loginGatewayHttp.logout().then(() => push(APP_ROUTES.login))
-  }
-
-  const ROLE_USER = {
-    [EnumProfile.ROLE_STUDENT]: "Estudante",
-    [EnumProfile.ROLE_MENTOR]: "Mentor",
-    [EnumProfile.ROLE_ENTERPRISE]: "Empresa",
-    [EnumProfile.ROLE_ADMIN]: "Administrador"
-  }
-
-  const firstLetter = user?.name?.charAt(0).toUpperCase();
 
   return (
     <div className="bg-gray-50 min-h-screen">
       <SidebarProvider>
-        <Sidebar className="border-r-0">
-          <SidebarHeader className="p-6">
-            <div className="flex justify-start items-center gap-2">
-              <Image src="/icons/logo.svg" width={150} height={60} alt="Logo da Kadoo" />
-            </div>
-          </SidebarHeader>
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {menuItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton
-                        asChild
-                        className="data-[active=true]:bg-[#5127FF] data-[active=true]:text-white hover:bg-[#5127FF]/10"
-                      >
-                        <a href={item.url} className="flex items-center gap-3">
-                          <item.icon className="w-5 h-5" />
-                          <span>{item.title}</span>
-                        </a>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarContent>
-          <SidebarFooter className="p-4">
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton className="hover:bg-red-50 hover:text-red-600" onClick={handleLogOut}>
-                  <LogOut className="w-5 h-5" />
-                  <span>Sair</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarFooter>
-        </Sidebar>
+
         <SidebarInset>
-
-
-          <header className="flex items-center justify-between p-6 bg-white border-b">
-            <div className="flex items-center gap-4">
-              <SidebarTrigger />
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Área do Administrador</h1>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-4">
-                <Avatar>
-                  <AvatarImage src="/placeholder.svg?height=40&width=40" />
-                  <AvatarFallback className="bg-[#5127FF] text-white">{firstLetter}</AvatarFallback>
-                </Avatar>
-                <div className="hidden md:block">
-                  <p className="font-medium text-gray-900">{user?.name}</p>
-                  <p className="text-sm text-gray-600">{ROLE_USER?.[role]}</p>
-                </div>
-              </div>
-            </div>
-          </header>
-
-          {/* HEADER */}
-
-
           <main className="p-6 space-y-8 min-h-screen">
             <Card className="bg-gradient-to-r from-[#5127FF] to-[#5127FF]/80 text-white border-0 shadow-xl">
               <CardContent className="p-8">
@@ -361,9 +283,6 @@ export default function AdminPage() {
                             <div className="w-12 h-12 bg-gradient-to-r from-[#5127FF] to-[#5127FF]/80 rounded-xl flex items-center justify-center">
                               <span className="text-white font-bold text-lg">{"★"}</span>
                             </div>
-                            {/* <span className="bg-blue-100 text-blue-700 text-xs font-medium px-2 py-1 rounded-full">
-                              {edict.category}
-                            </span> */}
                           </div>
 
                           <h3 className="font-bold text-lg text-gray-900 group-hover:text-[#5127FF] transition-colors">
@@ -389,14 +308,6 @@ export default function AdminPage() {
                   ))) : <span>Nenhum edital cadastrado</span>}
                 </div>
               </section>
-              {/* <h2 className="text-xl font-semibold">Gerenciamento de Editais</h2> */}
-
-              {/* <Button
-                asChild
-                className="bg-[#5127FF] hover:bg-[#5127FF]/90 text-white w-auto self-start"
-              >
-                <Link href="/criar-edital">Criar edital</Link>
-              </Button> */}
             </div>
 
             <div className="flex items-center justify-between">

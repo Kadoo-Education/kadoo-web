@@ -1,46 +1,23 @@
 import {
   Home,
   Inbox,
-  Calendar,
-  Search,
-  Settings,
-  User2,
-  ChevronUp,
-  Plus,
-  Projector,
-  ChevronDown,
+  Calendar, Settings, Projector
 } from "lucide-react";
 import {
   Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupAction,
-  SidebarGroupContent,
+  SidebarContent, SidebarGroup, SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuBadge,
   SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
-  SidebarSeparator,
+  SidebarMenuItem
 } from "@/presentation/external/components/ui/sidebar";
 import Link from "next/link";
 import Image from "next/image";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/presentation/external/components/ui/dropdown-menu";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/presentation/external/components/ui/collapsible";
+import { HttpClientFactory } from "@/infra/external/http/axios/http-client-factory";
+import { UserGatewayHttp } from "@/infra/modules/user/user-gateway-http";
+import { EnumProfile } from "../profile/profile";
 
 const items = [
   {
@@ -58,19 +35,23 @@ const items = [
     url: "#",
     icon: Calendar,
   },
-  // {
-  //   title: "Search",
-  //   url: "#",
-  //   icon: Search,
-  // },
-  {
-    title: "Configurações",
-    url: "#",
-    icon: Settings,
-  },
 ];
 
-export function AppSidebar() {
+const roles = {
+  [EnumProfile.ROLE_ADMIN]: "ROLE_ADMIN",
+  [EnumProfile.ROLE_ENTERPRISE]: "ROLE_ENTERPRISE",
+  [EnumProfile.ROLE_MENTOR]: "ROLE_MENTOR",
+  [EnumProfile.ROLE_STUDENT]: "ROLE_STUDENT",
+
+}
+
+export async function AppSidebar() {
+
+  const client = HttpClientFactory.create()
+  const gateway = new UserGatewayHttp(client)
+
+  const user = await gateway.get()
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="py-4">
@@ -107,6 +88,16 @@ export function AppSidebar() {
                   )}
                 </SidebarMenuItem>
               ))}
+              {roles[user.role] === "ROLE_ADMIN" && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <Link href="/adm">
+                      <Settings />
+                      <span>Área do Admin</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

@@ -89,7 +89,7 @@ export async function HomeSection() {
         <div className="grid gap-6  grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
           <Card className="group relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 bg-white">
             <div className="absolute inset-0 bg-gradient-to-br from-[#5127FF]/5 to-[#5127FF]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <CardContent className="p-6 relative z-10">
+            <CardContent className="p-6 relative">
               <div className="text-center space-y-4">
                 <div className="w-16 h-16 mx-auto bg-gradient-to-r from-[#5127FF] to-[#5127FF]/80 rounded-2xl flex items-center justify-center shadow-lg">
                   <TrendingUp className="w-8 h-8 text-white" />
@@ -112,7 +112,7 @@ export async function HomeSection() {
 
           <Card className="group relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 bg-white">
             <div className="absolute inset-0 bg-gradient-to-br from-[#F4DA02]/5 to-[#F4DA02]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <CardContent className="p-6 relative z-10">
+            <CardContent className="p-6 relative ">
               <div className="text-center space-y-4">
                 <div className="w-16 h-16 mx-auto bg-gradient-to-r from-[#F4DA02] to-[#F4DA02]/80 rounded-2xl flex items-center justify-center shadow-lg">
                   <Calendar className="w-8 h-8 text-white" />

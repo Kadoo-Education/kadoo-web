@@ -4,46 +4,41 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/presentation/externa
 import { Separator } from "@/presentation/external/components/ui/separator"
 
 import { Footprints, PlusCircle, Calendar as CalIcon, Clock3, Link2, MapPin } from "lucide-react"
-import { edictGatewayHttp } from "@/infra/modules/edict/edict-gateway-http"
+import { EdictGatewayHttp, edictGatewayHttp } from "@/infra/modules/edict/edict-gateway-http"
 import { notFound } from "next/navigation"
 import { CreateInPersonEventDialog } from "@/presentation/modules/step-by-id/components/create/create-in-person-event-dialog"
 import { CreateOnlineEventDialog } from "@/presentation/modules/step-by-id/components/create/create-online-event-dialog"
 import { CreateActivityDialog } from "@/presentation/modules/step-by-id/components/create/create-activity-dialog"
-import { stepGatewayHttp } from "@/infra/modules/step/step-gateway-http"
+import { StepGatewayHttp, stepGatewayHttp } from "@/infra/modules/step/step-gateway-http"
 import { createInPersonStepAction } from "./(actions)/create-in-person-step-action"
 import { StepCard } from "@/presentation/modules/step-by-id/components/view/step-card"
 import { EventStepCard } from "@/presentation/modules/step-by-id/components/view/event-step-card"
 import { Fragment } from "react"
 import { ActivityStepCard } from "@/presentation/modules/step-by-id/components/view/activity-step-card"
+import { HttpClientFactory } from "@/infra/external/http/axios/http-client-factory"
 
 type PageProps = {
-  params: Promise<{ id: string }>
-}
-
-async function getEdictById(id: number) {
-  const edict = await edictGatewayHttp.getById(id)
-
-  return edict
-}
-
-async function getStepsByEdictId(edictId: number) {
-  const steps = await stepGatewayHttp.getByEdictId(edictId)
-
-  return steps
+  params: Promise<{ id: number }>
 }
 
 export default async function EdictByIdPage({ params }: PageProps) {
 
+  const client = HttpClientFactory.create()
+  const edictGateway = new EdictGatewayHttp(client)
+
+  const stepGateway = new StepGatewayHttp(client)
+
+
   const { id } = await params
 
-  const edict = await getEdictById(Number(id))
+  const edict = await edictGateway.getById(id)
 
-  const steps = await getStepsByEdictId(Number(id))
+  const steps = await stepGateway.getByEdictId(id)
 
   if (!edict) notFound()
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex items-center justify-between">
           <div>

@@ -452,13 +452,13 @@ export function Form({ edict }: FormProps) {
       <Card className="mt-6 border-0 shadow-sm ring-1 ring-[#5127FF]/10">
         <CardHeader>
           <CardTitle className="text-base font-medium text-[#5127FF]">
-            Edite aqui as trilhas desse edital
+            Edite aqui as Etapas desse edital
           </CardTitle>
         </CardHeader>
         <CardContent>
           <Link href={`/adm/editais/${edict?.id}`}>
             <Button variant="outline" className="text-[#5127FF] hover:bg-[#5127FF]/10">
-              Ir para trilhas
+              Ir para Etapas
             </Button>
           </Link>
         </CardContent>

@@ -2,12 +2,10 @@
 
 import { loginGatewayHttp } from "@/infra/modules/login/login-gateway-http";
 import { Avatar, AvatarFallback } from "@/presentation/external/components/ui/avatar";
-import { Button } from "@/presentation/external/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/presentation/external/components/ui/dropdown-menu";
-import { SidebarTrigger, useSidebar } from "@/presentation/external/components/ui/sidebar";
+import { SidebarTrigger } from "@/presentation/external/components/ui/sidebar";
 import { APP_ROUTES } from "@/shared/constants/routes";
-import { Sun, Moon, User, Settings, LogOut } from "lucide-react";
-import { useTheme } from "next-themes";
+import { User, Settings, LogOut } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -15,16 +13,13 @@ export function Navbar() {
 
   const { push } = useRouter()
 
-  const { theme, setTheme } = useTheme();
-  const { toggleSidebar } = useSidebar();
-
   async function handleLogOut() {
     await loginGatewayHttp.logout().then(() => push(APP_ROUTES.login))
   }
 
 
   return (
-    <nav className="p-4 flex items-center justify-between sticky top-0 bg-background z-10">
+    <nav className="p-4 flex items-center justify-between sticky top-0 bg-background z-50 border-b">
       <div className="inline-flex gap-2 items-center">
         <SidebarTrigger />
         <Link href="/">Dashboard</Link>
